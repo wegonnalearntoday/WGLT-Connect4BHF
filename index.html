@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WGLT Knowledge Connect 4</title>
+  <style>
+  /* ═══ WGLT THEME: teal · gold · brown · parchment on dark ═══ */
+  :root{
+    --bg:#0a0c0e;
+    --panel:#0f1a1c;
+    --panel2:#152022;
+    --teal:#1a6b6b;
+    --teal2:#0d4a4a;
+    --teal-light:#4db8b8;
+    --gold:#c9952a;
+    --gold-light:#e8b84b;
+    --gold-pale:#f5d98a;
+    --brown:#6b3a1f;
+    --brown2:#4a2710;
+    --cream:#e8d5b0;
+    --cream2:#c9b48a;
+    --text:#f0e6d0;
+    --muted:#9aaa8a;
+    --red:#c0392b;
+    --shadow:0 12px 36px rgba(0,0,0,.55);
+    --radius:16px;
+    --border:rgba(201,149,42,.2);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; font-family:Georgia,'Times New Roman',serif;
+    background:
+      radial-gradient(ellipse at top,rgba(26,107,107,.12),transparent 40%),
+      radial-gradient(ellipse at bottom right,rgba(107,58,31,.1),transparent 40%),
+      linear-gradient(180deg,#0a0c0e,#060809);
+    color:var(--text); min-height:100vh;
+  }
+  .wrap{ width:min(1100px,100%); margin:0 auto; padding:14px 10px 40px; }
+
+  /* ── Hero ── */
+  .hero{
+    background:linear-gradient(135deg,rgba(26,107,107,.22),rgba(107,58,31,.18),rgba(201,149,42,.12));
+    border:1px solid rgba(201,149,42,.3); border-radius:20px;
+    padding:18px 20px; box-shadow:var(--shadow); margin-bottom:14px;
+    text-align:center;
+  }
+  .hero-logo{ width:72px; height:72px; border-radius:50%; object-fit:cover; margin:0 auto 10px; display:block; border:2px solid var(--gold); box-shadow:0 0 18px rgba(201,149,42,.3); }
+  h1{
+    margin:0 0 6px; font-size:clamp(1.5rem,5vw,2.4rem);
+    background:linear-gradient(135deg,var(--gold-light),var(--cream),var(--gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    letter-spacing:.02em;
+  }
+  .subtitle{ margin:0; color:var(--cream2); line-height:1.5; font-size:clamp(.88rem,2.5vw,.98rem); font-style:italic; }
+
+  /* ── Layout: side-by-side on desktop, stacked on mobile ── */
+  .layout{ display:grid; grid-template-columns:320px 1fr; gap:14px; }
+
+  /* ── Cards ── */
+  .card{
+    background:linear-gradient(180deg,rgba(26,107,107,.1),rgba(10,12,14,.8));
+    border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .card-body{ padding:14px; }
+
+  /* ── Accordion (tap sections) ── */
+  .accordion{ border-bottom:1px solid var(--border); }
+  .accordion:last-child{ border-bottom:none; }
+  .acc-header{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    padding:13px 14px; background:none; border:none; cursor:pointer;
+    color:var(--text); font:inherit; font-size:.95rem; font-weight:700;
+    font-family:Georgia,serif; letter-spacing:.01em;
+    border-radius:0; transform:none !important;
+    transition:background .15s;
+  }
+  .acc-header:hover{ background:rgba(201,149,42,.06); }
+  .acc-header .acc-icon{ font-size:1.1rem; transition:transform .25s; flex-shrink:0; margin-left:8px; }
+  .acc-header.open .acc-icon{ transform:rotate(180deg); }
+  .acc-header .acc-label{ display:flex; align-items:center; gap:8px; }
+  .acc-header .acc-emoji{ font-size:1.1rem; }
+  .acc-body{ display:none; padding:0 14px 14px; }
+  .acc-body.open{ display:block; }
+
+  /* First accordion open by default */
+  .accordion.default-open .acc-body{ display:block; }
+  .accordion.default-open .acc-header .acc-icon{ transform:rotate(180deg); }
+
+  /* ── Form elements ── */
+  label{ display:block; font-size:.88rem; margin:10px 0 5px; font-weight:700; color:var(--cream2); font-family:Georgia,serif; }
+  select,input,textarea,button{ font:inherit; }
+  select,input{
+    width:100%; padding:11px 13px; border-radius:10px;
+    border:1px solid rgba(201,149,42,.25);
+    background:rgba(10,12,14,.7); color:var(--text); outline:none;
+    font-size:.93rem; -webkit-appearance:none; appearance:none;
+  }
+  select:focus,input:focus{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,149,42,.15); }
+  textarea{
+    font:inherit; width:100%; padding:11px 13px; border-radius:10px;
+    border:1px solid rgba(201,149,42,.25);
+    background:rgba(10,12,14,.7); color:var(--text); outline:none;
+    resize:vertical; min-height:72px; line-height:1.5; font-size:.93rem;
+  }
+  textarea:focus{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,149,42,.15); }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* ── Buttons ── */
+  button{
+    border:none; border-radius:999px; padding:12px 18px;
+    cursor:pointer; color:var(--text); background:var(--panel2);
+    border:1px solid var(--border); font-family:Georgia,serif;
+    font-size:.92rem; letter-spacing:.01em;
+    transition:filter .15s, transform .1s;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+    min-height:44px;
+  }
+  button:active{ transform:scale(.97); filter:brightness(.9); }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .btn-primary{
+    background:linear-gradient(135deg,var(--teal),var(--teal2));
+    color:var(--cream); border-color:var(--teal-light);
+    font-weight:700;
+  }
+  .btn-warn{
+    background:linear-gradient(135deg,var(--red),#8b2020);
+    color:#fff; border-color:rgba(192,57,43,.4);
+  }
+  .btn-gold{
+    background:linear-gradient(135deg,var(--gold),var(--brown));
+    color:var(--cream); border-color:var(--gold-light); font-weight:800;
+  }
+  .btn-ghost{ background:rgba(255,255,255,.05); color:var(--muted); }
+  .btn-teal2{ background:linear-gradient(135deg,#1a5c5c,#0d3a3a); color:var(--teal-light); border-color:rgba(77,184,184,.3); }
+  .icon-btn{
+    padding:7px 11px; border-radius:8px; font-size:.82rem; min-height:36px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+  }
+  .icon-btn.del{ color:#ff8f8f; }
+  .btn-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .btn-row button{ flex:1 1 auto; }
+
+  /* ── Info boxes ── */
+  .help-box{
+    margin-top:10px; background:rgba(201,149,42,.07);
+    border-radius:12px; padding:11px 13px;
+    border-left:3px solid var(--gold); line-height:1.5;
+    font-size:.88rem; color:var(--cream2);
+  }
+  .preview{
+    margin-top:10px; background:rgba(26,107,107,.1);
+    border-radius:12px; padding:11px 13px;
+    border:1px solid rgba(26,107,107,.3); line-height:1.5;
+    font-size:.88rem; color:var(--cream2);
+  }
+
+  /* ── Status bar ── */
+  .status{
+    display:grid; grid-template-columns:repeat(5,1fr);
+    gap:8px; padding:12px 14px 0;
+  }
+  .stat{
+    background:rgba(26,107,107,.12); border:1px solid rgba(201,149,42,.18);
+    border-radius:12px; padding:10px 6px; text-align:center;
+  }
+  .stat .label{ font-size:.72rem; color:var(--muted); margin-bottom:3px; font-family:Georgia,serif; text-transform:uppercase; letter-spacing:.04em; }
+  .stat .value{ font-weight:800; font-size:.95rem; color:var(--gold-pale); }
+
+  /* ── Discs ── */
+  .turn-disc{
+    width:32px; height:32px; border-radius:50%; margin:0 auto 4px;
+    border:2px solid rgba(255,255,255,.2);
+    box-shadow:inset 0 -5px 0 rgba(0,0,0,.25);
+  }
+  .p1{ background:radial-gradient(circle at 35% 30%,#ffd6d6 0%,#ff8787 18%,#d62828 60%,#8c1818 100%); }
+  .p2{ background:radial-gradient(circle at 35% 30%,#fff5cc 0%,#ffd761 18%,#c9952a 60%,#6b3a1f 100%); }
+
+  /* ── Board ── */
+  .board-section{ padding:10px 14px 14px; }
+  .board-shell{ overflow-x:auto; width:100%; -webkit-overflow-scrolling:touch; }
+  .column-buttons,.board{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px; min-width:280px;
+  }
+  .drop-btn{
+    height:42px; border-radius:10px; font-weight:800; font-size:.9rem;
+    background:linear-gradient(180deg,rgba(26,107,107,.5),rgba(13,74,74,.7));
+    border:1px solid rgba(77,184,184,.3); color:var(--teal-light);
+    padding:0; border-radius:10px; min-height:42px;
+  }
+  .board-wrap{
+    margin-top:6px; border-radius:18px; padding:10px;
+    border:1px solid rgba(201,149,42,.2);
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.3),var(--shadow);
+    transition:background .4s ease;
+  }
+  .cell{
+    width:100%; aspect-ratio:1/1; border-radius:50%;
+    position:relative; overflow:hidden;
+    background:radial-gradient(circle at 35% 30%,#e8d5b0 0%,#b8a070 20%,#8a7050 50%,#4a3520 100%);
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.35), inset 0 3px 6px rgba(0,0,0,.3);
+  }
+  .disc{
+    position:absolute; inset:4px; border-radius:50%;
+    border:2px solid rgba(255,255,255,.25);
+    box-shadow:inset 0 -8px 0 rgba(0,0,0,.2);
+    animation:dropIn .22s cubic-bezier(.2,.8,.4,1);
+  }
+  @keyframes dropIn{
+    from{ transform:translateY(-28px) scale(.8); opacity:.2; }
+    to{ transform:translateY(0) scale(1); opacity:1; }
+  }
+  .legend{ margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:.85rem; }
+  .legend span{ display:flex; align-items:center; gap:6px; }
+  .mini-disc{ width:14px; height:14px; border-radius:50%; display:inline-block; }
+  .win-line{
+    margin-top:10px;
+    background:linear-gradient(135deg,rgba(201,149,42,.15),rgba(107,58,31,.1));
+    border:1px solid rgba(201,149,42,.35); border-radius:12px;
+    padding:12px; color:var(--gold-pale); display:none; font-weight:700; text-align:center;
+    font-size:1.05rem;
+  }
+  .win-line.show{ display:block; }
+  .footer-note{ margin-top:14px; color:var(--muted); text-align:center; font-size:.8rem; }
+
+  /* ── Question Modal ── */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.82);
+    display:none; align-items:center; justify-content:center;
+    padding:12px; z-index:9999;
+  }
+  .modal-backdrop.show{ display:flex; }
+  .modal{
+    width:min(680px,100%);
+    background:linear-gradient(180deg,#111a1c,#080c0d);
+    border-radius:20px; border:1px solid rgba(201,149,42,.25);
+    box-shadow:var(--shadow); padding:20px;
+    max-height:94vh; overflow-y:auto;
+  }
+  .modal h3{ margin:0 0 4px; font-size:1.25rem; color:var(--gold-light); }
+  .modal p{ margin:10px 0; line-height:1.55; font-size:.95rem; }
+  .meta{ color:var(--muted); font-size:.85rem; }
+  .choices{ display:grid; gap:9px; margin:12px 0; }
+  .choice-btn{
+    width:100%; text-align:left; border-radius:12px; padding:13px 15px;
+    background:rgba(26,107,107,.12); border:1px solid rgba(77,184,184,.2);
+    color:var(--text); font-size:.95rem; min-height:48px;
+  }
+  .choice-btn:active{ background:rgba(26,107,107,.3); }
+  .answer-input{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .answer-input input{ flex:1 1 180px; font-size:1rem; }
+  .feedback{ min-height:22px; margin-top:10px; font-weight:800; font-size:.95rem; }
+  .good{ color:#81f3a0; }
+  .bad{ color:#ff8f8f; }
+
+  /* ── Editor Modal ── */
+  .qeditor-modal{ width:min(820px,100%); }
+  .qe-tabs{ display:flex; gap:7px; margin-bottom:14px; flex-wrap:wrap; }
+  .qe-tab{
+    padding:8px 16px; border-radius:999px;
+    background:rgba(26,107,107,.15); border:1px solid rgba(77,184,184,.2);
+    color:var(--muted); font-size:.88rem; font-weight:700;
+    font-family:Georgia,serif; transition:all .15s; min-height:38px;
+  }
+  .qe-tab.active{
+    background:linear-gradient(135deg,var(--teal),var(--teal2));
+    color:var(--cream); border-color:var(--teal-light);
+  }
+  .qe-section{ display:none; }
+  .qe-section.active{ display:block; }
+
+  .section-tabs{ display:flex; gap:0; margin-bottom:12px; border-radius:10px; overflow:hidden; border:1px solid rgba(201,149,42,.2); }
+  .section-tab{ flex:1; padding:9px 6px; text-align:center; cursor:pointer; background:rgba(10,12,14,.6); color:var(--muted); font-size:.85rem; font-weight:700; border:none; border-radius:0; transition:all .15s; min-height:40px; font-family:Georgia,serif; }
+  .section-tab.active{ background:rgba(26,107,107,.25); color:var(--teal-light); }
+  .section-tab:not(:last-child){ border-right:1px solid rgba(201,149,42,.2); }
+  .import-panel{ display:none; }
+  .import-panel.active{ display:block; }
+  .manual-panel.hidden{ display:none; }
+
+  .add-form{
+    background:rgba(26,107,107,.07); border:1px solid rgba(201,149,42,.15);
+    border-radius:14px; padding:14px; margin-bottom:14px;
+  }
+  .add-form h4{ margin:0 0 10px; font-size:.95rem; color:var(--gold-light); }
+  .mc-choices-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+
+  .q-list{ display:flex; flex-direction:column; gap:7px; max-height:300px; overflow-y:auto; }
+  .q-item{
+    background:rgba(26,107,107,.08); border:1px solid rgba(201,149,42,.15);
+    border-radius:11px; padding:11px 13px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+  }
+  .q-item-text{ flex:1; line-height:1.4; font-size:.88rem; }
+  .q-item-meta{ font-size:.76rem; color:var(--muted); margin-top:3px; }
+  .q-item-actions{ flex-shrink:0; }
+  .q-count-badge{
+    display:inline-block; background:rgba(201,149,42,.15); color:var(--gold-light);
+    border:1px solid rgba(201,149,42,.3); border-radius:999px;
+    font-size:.76rem; font-weight:800; padding:2px 8px; margin-left:7px; vertical-align:middle;
+  }
+  .empty-state{ color:var(--muted); text-align:center; padding:20px; font-size:.88rem; font-style:italic; }
+
+  /* Custom mode toggle */
+  .custom-mode-row{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(26,107,107,.08); border:1px solid rgba(201,149,42,.15);
+    border-radius:11px; padding:10px 13px; margin-top:10px;
+  }
+  .toggle-switch{ position:relative; width:44px; height:26px; flex-shrink:0; }
+  .toggle-switch input{ opacity:0; width:0; height:0; position:absolute; }
+  .toggle-slider{ position:absolute; inset:0; border-radius:999px; background:rgba(255,255,255,.1); cursor:pointer; transition:.2s; }
+  .toggle-slider:before{ content:""; position:absolute; width:20px; height:20px; border-radius:50%; left:3px; top:3px; background:#555; transition:.2s; }
+  .toggle-switch input:checked + .toggle-slider{ background:var(--teal); }
+  .toggle-switch input:checked + .toggle-slider:before{ transform:translateX(18px); background:var(--cream); }
+  .toggle-label{ font-size:.88rem; line-height:1.4; color:var(--cream2); }
+  .toggle-label strong{ display:block; color:var(--text); }
+
+  .divider{ height:1px; background:rgba(201,149,42,.15); margin:14px 0; }
+
+  /* Import panel */
+  .import-box{ background:rgba(26,107,107,.07); border:1px solid rgba(201,149,42,.15); border-radius:14px; padding:14px; margin-bottom:14px; }
+  .import-box h4{ margin:0 0 8px; font-size:.95rem; color:var(--gold-light); }
+  .format-hint{ background:rgba(0,0,0,.3); border-radius:9px; padding:9px 12px; font-size:.8rem; color:var(--muted); font-family:monospace; line-height:1.7; margin:7px 0 11px; border:1px solid rgba(255,255,255,.06); white-space:pre-wrap; }
+  .import-result{ margin-top:9px; padding:9px 12px; border-radius:9px; background:rgba(129,243,160,.07); border:1px solid rgba(129,243,160,.2); font-size:.86rem; line-height:1.5; display:none; }
+  .import-result.show{ display:block; }
+  .import-result.has-error{ background:rgba(255,143,143,.07); border-color:rgba(255,143,143,.2); color:#ff8f8f; }
+  .parsed-preview{ margin-top:9px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; }
+  .parsed-item{ background:rgba(255,255,255,.04); border-radius:7px; padding:7px 10px; font-size:.8rem; line-height:1.4; border:1px solid rgba(255,255,255,.06); }
+  .p-answer{ color:var(--gold-light); font-weight:700; }
+  .mc-badge{ font-size:.7rem; background:rgba(26,107,107,.4); color:var(--teal-light); border-radius:4px; padding:1px 5px; margin-left:3px; }
+  .input-badge{ font-size:.7rem; background:rgba(201,149,42,.2); color:var(--gold-pale); border-radius:4px; padding:1px 5px; margin-left:3px; }
+
+  /* ── Mobile-first responsive ── */
+  @media(max-width:860px){
+    .layout{ grid-template-columns:1fr; }
+    .status{ grid-template-columns:repeat(5,1fr); gap:6px; }
+    .stat{ padding:8px 4px; }
+    .stat .label{ font-size:.65rem; }
+    .stat .value{ font-size:.85rem; }
+  }
+  @media(max-width:540px){
+    .wrap{ padding:10px 8px 32px; }
+    .status{ grid-template-columns:repeat(3,1fr); }
+    .row2,.mc-choices-grid{ grid-template-columns:1fr; }
+    .column-buttons,.board{ gap:4px; }
+    .drop-btn{ font-size:.8rem; height:38px; min-height:38px; }
+    .board-wrap{ padding:8px; border-radius:14px; }
+    .btn-row button{ min-width:0; font-size:.85rem; padding:11px 12px; }
+    .qe-tabs{ gap:5px; }
+    .qe-tab{ padding:7px 11px; font-size:.82rem; }
+    .modal{ padding:16px; }
+    .choice-btn{ padding:12px 13px; font-size:.9rem; }
+  }
+  @media(max-width:380px){
+    h1{ font-size:1.3rem; }
+    .column-buttons,.board{ gap:3px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Hero -->
+  <section class="hero">
+    <img src="/mnt/user-data/uploads/Connect_4.png" alt="WGLT Connect 4" class="hero-logo" onerror="this.style.display='none'" />
+    <h1 id="gameTitle">WGLT Knowledge Connect 4</h1>
+    <p class="subtitle" id="gameSubtitle">Answer questions correctly to drop a checker and connect four!</p>
+  </section>
+
+  <div class="layout">
+
+    <!-- ══ SETUP PANEL ══ -->
+    <section class="card">
+
+      <!-- Game Settings accordion -->
+      <div class="accordion default-open">
+        <button class="acc-header open" onclick="toggleAcc(this)">
+          <span class="acc-label"><span class="acc-emoji">⚙️</span> Game Settings</span>
+          <span class="acc-icon">▼</span>
+        </button>
+        <div class="acc-body open">
+          <label for="themeSelect">Theme</label>
+          <select id="themeSelect">
+            <option value="mixed">Mixed (Spelling + Math)</option>
+            <option value="spelling">Spelling</option>
+            <option value="math">Math</option>
+            <option value="blackhistory">Black History</option>
+          </select>
+
+          <label for="difficultySelect">Difficulty</label>
+          <select id="difficultySelect">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+
+          <div class="row2">
+            <div>
+              <label for="timerSelect">Timer</label>
+              <select id="timerSelect">
+                <option value="0" selected>Off</option>
+                <option value="10">10 sec</option>
+                <option value="6">6 sec</option>
+                <option value="3">3 sec</option>
+              </select>
+            </div>
+            <div>
+              <label for="goalSelect">Win Goal</label>
+              <select id="goalSelect">
+                <option value="4" selected>Connect 4</option>
+                <option value="5">Connect 5</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Players accordion -->
+      <div class="accordion">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          <span class="acc-label"><span class="acc-emoji">👥</span> Players</span>
+          <span class="acc-icon">▼</span>
+        </button>
+        <div class="acc-body">
+          <label for="playerOneName">Player 1 Name</label>
+          <input id="playerOneName" type="text" value="Player 1" maxlength="24" />
+          <label for="playerTwoName">Player 2 Name</label>
+          <input id="playerTwoName" type="text" value="Player 2" maxlength="24" />
+        </div>
+      </div>
+
+      <!-- Question Mode accordion -->
+      <div class="accordion">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          <span class="acc-label"><span class="acc-emoji">🎯</span> Question Mode</span>
+          <span class="acc-icon">▼</span>
+        </button>
+        <div class="acc-body">
+          <div class="custom-mode-row">
+            <label class="toggle-switch" style="margin:0;">
+              <input type="checkbox" id="customModeToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="toggle-label">
+              <strong>Custom Questions Only</strong>
+              Off = mix custom with built-in
+            </div>
+          </div>
+          <div class="preview" id="questionPreview" style="margin-top:10px;">
+            <strong>Preview:</strong> choose a theme then tap Preview.
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works accordion -->
+      <div class="accordion">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          <span class="acc-label"><span class="acc-emoji">❓</span> How It Works</span>
+          <span class="acc-icon">▼</span>
+        </button>
+        <div class="acc-body">
+          <div class="help-box">
+            Tap a column, answer the question, and your checker drops only if correct. Wrong answer or time-out skips your turn. First to connect <strong>4</strong> (or 5) wins!
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons always visible -->
+      <div style="padding:12px 14px 14px;">
+        <div class="btn-row">
+          <button id="startBtn" class="btn-primary">▶ Start Game</button>
+          <button id="resetBtn" class="btn-warn">↺ Reset</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px;">
+          <button id="sampleBtn" class="btn-gold">👁 Preview Questions</button>
+          <button id="openEditorBtn" class="btn-teal2">✏️ Manage Questions</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══ GAME BOARD PANEL ══ -->
+    <section class="card">
+      <!-- Status bar -->
+      <div class="status">
+        <div class="stat">
+          <div class="label">Turn</div>
+          <div class="value" id="turnText">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Theme</div>
+          <div class="value" id="themeText">Mixed</div>
+        </div>
+        <div class="stat">
+          <div class="label">Timer</div>
+          <div class="value" id="timerText">Off</div>
+        </div>
+        <div class="stat">
+          <div class="label">Goal</div>
+          <div class="value" id="goalText">4</div>
+        </div>
+        <div class="stat">
+          <div class="turn-disc p1" id="turnDisc"></div>
+          <div style="font-weight:800;font-size:.82rem;line-height:1.2;color:var(--gold-pale);" id="turnName">Start!</div>
+        </div>
+      </div>
+
+      <!-- Board -->
+      <div class="board-section">
+        <div class="board-shell">
+          <div class="column-buttons" id="columnButtons"></div>
+          <div class="board-wrap" id="boardWrap">
+            <div class="board" id="board"></div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="mini-disc p1"></i><span id="legend1">Player 1</span></span>
+          <span><i class="mini-disc p2"></i><span id="legend2">Player 2</span></span>
+        </div>
+        <div class="win-line" id="winLine"></div>
+        <p class="footer-note">WGLT · One-file classroom game · No installs</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ══ QUESTION MODAL ══ -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Answer to Drop Your Piece</h3>
+    <div class="meta" id="modalMeta"></div>
+    <p id="questionText"></p>
+    <div class="meta" id="countdownText"></div>
+    <div id="choicesWrap" class="choices"></div>
+    <div id="inputWrap" class="answer-input" style="display:none;">
+      <input id="answerInput" type="text" placeholder="Type your answer" autocomplete="off" inputmode="text" />
+      <button id="submitAnswerBtn" class="btn-primary">Submit</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button id="closeModalBtn" class="btn-ghost">✕ Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDITOR MODAL ══ -->
+<div class="modal-backdrop" id="editorBackdrop">
+  <div class="modal qeditor-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <h3 style="margin:0;color:var(--gold-light);">✏️ Question Editor</h3>
+        <div class="meta">Saved in your browser automatically.</div>
+      </div>
+      <button id="closeEditorBtn" class="btn-ghost" style="flex-shrink:0;min-width:80px;">✕ Close</button>
+    </div>
+
+    <div class="qe-tabs" id="qeTabs">
+      <button class="qe-tab active" data-tab="spelling">📖 Spelling</button>
+      <button class="qe-tab" data-tab="math">🔢 Math</button>
+      <button class="qe-tab" data-tab="blackhistory">✊ Black History</button>
+    </div>
+
+    <!-- Spelling -->
+    <div class="qe-section active" id="qe-spelling">
+      <div class="section-tabs">
+        <button class="section-tab active" onclick="switchSectionTab('spelling','manual',this)">✏️ Add One by One</button>
+        <button class="section-tab" onclick="switchSectionTab('spelling','import',this)">📋 Paste &amp; Import</button>
+      </div>
+      <div class="manual-panel" id="sp-manual">
+        <div class="add-form">
+          <h4>+ Add Spelling Question</h4>
+          <label>Question Type</label>
+          <select id="sp-type" onchange="toggleQEForm('sp')">
+            <option value="input">Type-in Answer</option>
+            <option value="mc">Multiple Choice</option>
+          </select>
+          <label>Question / Prompt</label>
+          <textarea id="sp-prompt" placeholder="e.g. Fill in the missing letter: S _ H O O L"></textarea>
+          <label>Correct Answer</label>
+          <input id="sp-answer" type="text" placeholder="e.g. C" />
+          <div id="sp-mc-block" style="display:none;">
+            <label>Wrong Choices</label>
+            <div class="mc-choices-grid">
+              <input id="sp-w1" type="text" placeholder="Wrong choice 1" />
+              <input id="sp-w2" type="text" placeholder="Wrong choice 2" />
+              <input id="sp-w3" type="text" placeholder="Wrong choice 3" />
+            </div>
+          </div>
+          <label>Difficulty</label>
+          <select id="sp-diff">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="addCustomQuestion('spelling')">+ Add Question</button>
+          </div>
+          <div id="sp-msg" class="feedback" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="import-panel" id="sp-import">
+        <div class="import-box">
+          <h4>📋 Paste a Word List</h4>
+          <div style="font-size:.85rem;color:var(--cream2);">One word per line — generates fill-in-the-blank and multiple choice automatically.</div>
+          <div class="format-hint">entrepreneur
+responsibility
+perseverance
+innovation</div>
+          <label>Difficulty</label>
+          <select id="sp-import-diff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+          <textarea id="sp-import-text" placeholder="Paste words here, one per line..." style="min-height:90px;margin-top:8px;"></textarea>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="parseSpellingImport()">⚡ Generate</button>
+            <button class="btn-ghost" onclick="clearImport('sp')">Clear</button>
+          </div>
+          <div id="sp-import-result" class="import-result"></div>
+          <div id="sp-import-preview" class="parsed-preview"></div>
+          <div id="sp-import-savebtn" style="display:none;margin-top:10px;">
+            <button class="btn-primary" onclick="saveImport('spelling')" style="width:100%;">✓ Save All to Question Bank</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-weight:700;margin-bottom:7px;font-size:.9rem;">
+        Saved Spelling Questions <span class="q-count-badge" id="sp-count">0</span>
+      </div>
+      <div class="q-list" id="sp-list"></div>
+    </div>
+
+    <!-- Math -->
+    <div class="qe-section" id="qe-math">
+      <div class="section-tabs">
+        <button class="section-tab active" onclick="switchSectionTab('math','manual',this)">✏️ Add One by One</button>
+        <button class="section-tab" onclick="switchSectionTab('math','import',this)">📋 Paste &amp; Import</button>
+      </div>
+      <div class="manual-panel" id="ma-manual">
+        <div class="add-form">
+          <h4>+ Add Math Question</h4>
+          <label>Question Type</label>
+          <select id="ma-type" onchange="toggleQEForm('ma')">
+            <option value="input">Type-in Answer</option>
+            <option value="mc">Multiple Choice</option>
+          </select>
+          <label>Question / Prompt</label>
+          <textarea id="ma-prompt" placeholder="e.g. 7 × 8 = ?"></textarea>
+          <label>Correct Answer</label>
+          <input id="ma-answer" type="text" placeholder="e.g. 56" />
+          <div id="ma-mc-block" style="display:none;">
+            <label>Wrong Choices</label>
+            <div class="mc-choices-grid">
+              <input id="ma-w1" type="text" placeholder="Wrong choice 1" />
+              <input id="ma-w2" type="text" placeholder="Wrong choice 2" />
+              <input id="ma-w3" type="text" placeholder="Wrong choice 3" />
+            </div>
+          </div>
+          <label>Difficulty</label>
+          <select id="ma-diff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="addCustomQuestion('math')">+ Add Question</button>
+          </div>
+          <div id="ma-msg" class="feedback" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="import-panel" id="ma-import">
+        <div class="import-box">
+          <h4>📋 Paste Math Problems</h4>
+          <div style="font-size:.85rem;color:var(--cream2);">One expression per line — the game solves each automatically. Use +, -, *, /</div>
+          <div class="format-hint">4 + 5
+7 * 8
+45 / 9
+(9 * 3) - 4</div>
+          <div class="row2" style="margin-top:8px;">
+            <div>
+              <label>Answer Format</label>
+              <select id="ma-import-type"><option value="input">Type-in</option><option value="mc">Multiple Choice</option></select>
+            </div>
+            <div>
+              <label>Difficulty</label>
+              <select id="ma-import-diff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+            </div>
+          </div>
+          <textarea id="ma-import-text" placeholder="Paste math problems here, one per line..." style="min-height:90px;margin-top:8px;"></textarea>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="parseMathImport()">⚡ Generate</button>
+            <button class="btn-ghost" onclick="clearImport('ma')">Clear</button>
+          </div>
+          <div id="ma-import-result" class="import-result"></div>
+          <div id="ma-import-preview" class="parsed-preview"></div>
+          <div id="ma-import-savebtn" style="display:none;margin-top:10px;">
+            <button class="btn-primary" onclick="saveImport('math')" style="width:100%;">✓ Save All to Question Bank</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-weight:700;margin-bottom:7px;font-size:.9rem;">
+        Saved Math Questions <span class="q-count-badge" id="ma-count">0</span>
+      </div>
+      <div class="q-list" id="ma-list"></div>
+    </div>
+
+    <!-- Black History -->
+    <div class="qe-section" id="qe-blackhistory">
+      <div class="section-tabs">
+        <button class="section-tab active" onclick="switchSectionTab('blackhistory','manual',this)">✏️ Add One by One</button>
+        <button class="section-tab" onclick="switchSectionTab('blackhistory','import',this)">📋 Paste &amp; Import</button>
+      </div>
+      <div class="manual-panel" id="bh-manual">
+        <div class="add-form">
+          <h4>+ Add Black History Question</h4>
+          <label>Question Type</label>
+          <select id="bh-type" onchange="toggleQEForm('bh')">
+            <option value="mc">Multiple Choice</option>
+            <option value="input">Type-in Answer</option>
+          </select>
+          <label>Question / Prompt</label>
+          <textarea id="bh-prompt" placeholder="e.g. Who was the first African American on the Supreme Court?"></textarea>
+          <label>Correct Answer</label>
+          <input id="bh-answer" type="text" placeholder="e.g. Thurgood Marshall" />
+          <div id="bh-mc-block">
+            <label>Wrong Choices</label>
+            <div class="mc-choices-grid">
+              <input id="bh-w1" type="text" placeholder="Wrong choice 1" />
+              <input id="bh-w2" type="text" placeholder="Wrong choice 2" />
+              <input id="bh-w3" type="text" placeholder="Wrong choice 3" />
+            </div>
+          </div>
+          <label>Difficulty</label>
+          <select id="bh-diff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="addCustomQuestion('blackhistory')">+ Add Question</button>
+          </div>
+          <div id="bh-msg" class="feedback" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="import-panel" id="bh-import">
+        <div class="import-box">
+          <h4>📋 Paste Black History Q&amp;A</h4>
+          <div style="font-size:.85rem;color:var(--cream2);">Auto-detects format per line:</div>
+          <div class="format-hint">Question | Answer
+Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
+          <label>Difficulty</label>
+          <select id="bh-import-diff"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>
+          <textarea id="bh-import-text" placeholder="Paste Q&A here..." style="min-height:100px;margin-top:8px;"></textarea>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="parseBHImport()">⚡ Generate</button>
+            <button class="btn-ghost" onclick="clearImport('bh')">Clear</button>
+          </div>
+          <div id="bh-import-result" class="import-result"></div>
+          <div id="bh-import-preview" class="parsed-preview"></div>
+          <div id="bh-import-savebtn" style="display:none;margin-top:10px;">
+            <button class="btn-primary" onclick="saveImport('blackhistory')" style="width:100%;">✓ Save All to Question Bank</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-weight:700;margin-bottom:7px;font-size:.9rem;">
+        Saved Black History Questions <span class="q-count-badge" id="bh-count">0</span>
+      </div>
+      <div class="q-list" id="bh-list"></div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div class="meta">Stored in this browser — persists between sessions.</div>
+      <button class="btn-warn" onclick="clearAllCustom()" style="font-size:.82rem;padding:8px 14px;min-height:36px;">🗑 Clear All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Accordion toggle ────────────────────────────────────────────────────
+  function toggleAcc(btn){
+    const body = btn.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+  }
+
+    // ─── Constants ────────────────────────────────────────────────────────────
+  const ROWS = 6, COLS = 7;
+  const STORAGE_KEY = 'wglt_custom_questions';
+
+  // ─── State ────────────────────────────────────────────────────────────────
+  let CONNECT_GOAL = 4;
+  let board = [];
+  let currentPlayer = 1;
+  let gameStarted = false;
+  let gameOver = false;
+  let currentQuestion = null;
+  let targetColumn = null;
+  let timerId = null;
+  let timeLeft = 0;
+
+  // ─── Built-in Question Banks ──────────────────────────────────────────────
+  const spellingBank = {
+    easy:[
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["inventor","invetor","inventer","invintor"],answer:"inventor"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["leader","leeder","ledar","leadr"],answer:"leader"},
+      {prompt:"Fill in the missing letter: M _ T H",type:"input",answer:"A"},
+      {prompt:"Fill in the missing letter: S P E _ L",type:"input",answer:"L"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["school","skool","schole","schoool"],answer:"school"},
+      {prompt:"Fill in the missing letter: B O O _",type:"input",answer:"K"},
+      {prompt:"Which is the correct word?",type:"mc",choices:["history","histary","historee","histery"],answer:"history"},
+      {prompt:"Fill in the missing letter: R E A _",type:"input",answer:"D"}
+    ],
+    medium:[
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["engineer","enginer","enginere","engeeneer"],answer:"engineer"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["education","eduction","educashun","educatoin"],answer:"education"},
+      {prompt:"Fill in the missing letter: C O M M U N I _ Y",type:"input",answer:"T"},
+      {prompt:"Fill in the missing letter: D E M O C R A _ Y",type:"input",answer:"C"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["scientist","scienctist","sientist","scintist"],answer:"scientist"},
+      {prompt:"Fill in the missing letter: F I N A N _ E",type:"input",answer:"C"},
+      {prompt:"Which is the correct word?",type:"mc",choices:["creative","creativ","creetive","creattive"],answer:"creative"},
+      {prompt:"Fill in the missing letter: M O T I _ A T I O N",type:"input",answer:"V"}
+    ],
+    hard:[
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["entrepreneur","enterpreneur","entrepeneur","entreprenuer"],answer:"entrepreneur"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["responsibility","responsiblity","responcibility","responsability"],answer:"responsibility"},
+      {prompt:"Fill in the missing letter: A C H I E _ E M E N T",type:"input",answer:"V"},
+      {prompt:"Fill in the missing letter: P E R S E V E R A N _ E",type:"input",answer:"C"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["mathematics","mathimatics","mathemattics","mathimattics"],answer:"mathematics"},
+      {prompt:"Fill in the missing letter: I N S P I R A _ I O N",type:"input",answer:"T"},
+      {prompt:"Which is the correct word?",type:"mc",choices:["innovation","innovashun","inovation","innnovation"],answer:"innovation"},
+      {prompt:"Fill in the missing letter: K N O W L E D _ E",type:"input",answer:"G"}
+    ]
+  };
+
+  const mathBank = {
+    easy:[
+      {prompt:"4 + 5 = ?",type:"input",answer:"9"},
+      {prompt:"9 - 3 = ?",type:"input",answer:"6"},
+      {prompt:"Which answer is correct for 2 + 7?",type:"mc",choices:["8","9","10","11"],answer:"9"},
+      {prompt:"6 + 1 = ?",type:"input",answer:"7"},
+      {prompt:"10 - 4 = ?",type:"input",answer:"6"},
+      {prompt:"Which answer is correct for 3 + 3?",type:"mc",choices:["5","6","7","8"],answer:"6"},
+      {prompt:"8 - 2 = ?",type:"input",answer:"6"},
+      {prompt:"5 + 4 = ?",type:"input",answer:"9"}
+    ],
+    medium:[
+      {prompt:"7 × 6 = ?",type:"input",answer:"42"},
+      {prompt:"45 ÷ 9 = ?",type:"input",answer:"5"},
+      {prompt:"Which answer is correct for 8 × 4?",type:"mc",choices:["28","30","32","36"],answer:"32"},
+      {prompt:"9 × 5 = ?",type:"input",answer:"45"},
+      {prompt:"36 ÷ 6 = ?",type:"input",answer:"6"},
+      {prompt:"Which answer is correct for 14 + 13?",type:"mc",choices:["25","26","27","28"],answer:"27"},
+      {prompt:"12 × 3 = ?",type:"input",answer:"36"},
+      {prompt:"50 - 18 = ?",type:"input",answer:"32"}
+    ],
+    hard:[
+      {prompt:"(9 × 3) - 4 = ?",type:"input",answer:"23"},
+      {prompt:"12 × 7 = ?",type:"input",answer:"84"},
+      {prompt:"Which answer is correct for (24 ÷ 6) + 8?",type:"mc",choices:["10","11","12","13"],answer:"12"},
+      {prompt:"15 × 4 - 9 = ?",type:"input",answer:"51"},
+      {prompt:"(18 + 6) ÷ 3 = ?",type:"input",answer:"8"},
+      {prompt:"Which answer is correct for 11 × 11?",type:"mc",choices:["111","121","131","141"],answer:"121"},
+      {prompt:"(5 × 8) + 17 = ?",type:"input",answer:"57"},
+      {prompt:"96 ÷ 12 = ?",type:"input",answer:"8"}
+    ]
+  };
+
+  const blackHistoryBank = {
+    easy:[
+      {prompt:"Who invented the traffic light?",type:"mc",choices:["Garrett Morgan","George Washington Carver","Benjamin Banneker","Lonnie Johnson"],answer:"Garrett Morgan"},
+      {prompt:"Who became the first Black woman in space?",type:"mc",choices:["Mae Jemison","Bessie Coleman","Katherine Johnson","Shirley Chisholm"],answer:"Mae Jemison"},
+      {prompt:"Who was a famous conductor on the Underground Railroad?",type:"mc",choices:["Harriet Tubman","Rosa Parks","Ida B. Wells","Mary McLeod Bethune"],answer:"Harriet Tubman"},
+      {prompt:"Who refused to give up her seat on a Montgomery bus?",type:"mc",choices:["Rosa Parks","Coretta Scott King","Ella Baker","Maya Angelou"],answer:"Rosa Parks"},
+      {prompt:"Type the last name of the inventor known for the Super Soaker: Lonnie ____",type:"input",answer:"Johnson"},
+      {prompt:"Type the last name of the first Black woman in space: Mae ____",type:"input",answer:"Jemison"},
+      {prompt:"Who made major contributions to NASA calculations for space missions?",type:"mc",choices:["Katherine Johnson","Madam C.J. Walker","Wilma Rudolph","Gwendolyn Brooks"],answer:"Katherine Johnson"},
+      {prompt:"Type the last name of the civil rights leader: Martin Luther King, ____",type:"input",answer:"Jr"}
+    ],
+    medium:[
+      {prompt:"Who founded a successful hair care business and became one of America's first self-made women millionaires?",type:"mc",choices:["Madam C.J. Walker","Bessie Coleman","Mary McLeod Bethune","Alice Coachman"],answer:"Madam C.J. Walker"},
+      {prompt:"Who was the first Black woman elected to Congress?",type:"mc",choices:["Shirley Chisholm","Kamala Harris","Barbara Jordan","Fannie Lou Hamer"],answer:"Shirley Chisholm"},
+      {prompt:"Who was the first Black woman to earn a pilot's license?",type:"mc",choices:["Bessie Coleman","Mae Jemison","Ida B. Wells","Ruby Bridges"],answer:"Bessie Coleman"},
+      {prompt:"Who developed hundreds of uses for peanuts and sweet potatoes?",type:"mc",choices:["George Washington Carver","Elijah McCoy","Lewis Latimer","Percy Julian"],answer:"George Washington Carver"},
+      {prompt:"Type the last name of the activist and journalist: Ida B. ____",type:"input",answer:"Wells"},
+      {prompt:"Type the last name of the poet: Maya ____",type:"input",answer:"Angelou"},
+      {prompt:"Who improved the incandescent light bulb and worked with Alexander Graham Bell?",type:"mc",choices:["Lewis Latimer","Granville T. Woods","Elijah McCoy","Mark Dean"],answer:"Lewis Latimer"},
+      {prompt:"Who was known as the 'Father of Black History'?",type:"mc",choices:["Carter G. Woodson","W.E.B. Du Bois","Booker T. Washington","Frederick Douglass"],answer:"Carter G. Woodson"},
+      {prompt:"Type the last name of Supreme Court Justice Thurgood ____",type:"input",answer:"Marshall"},
+      {prompt:"Who invented the home security system in 1966?",type:"mc",choices:["Marie Van Brittan Brown","Annie Malone","Sarah Boone","Patricia Bath"],answer:"Marie Van Brittan Brown"}
+    ],
+    hard:[
+      {prompt:"Who patented an improved ironing board in 1892?",type:"mc",choices:["Sarah Boone","Madam C.J. Walker","Mary Jackson","Alice Ball"],answer:"Sarah Boone"},
+      {prompt:"Who invented a better way to lubricate steam engines, leading to the phrase 'the real McCoy'?",type:"mc",choices:["Elijah McCoy","Lewis Latimer","Percy Julian","Garrett Morgan"],answer:"Elijah McCoy"},
+      {prompt:"Who became the first Black woman to win an Olympic gold medal?",type:"mc",choices:["Alice Coachman","Florence Griffith Joyner","Wilma Rudolph","Althea Gibson"],answer:"Alice Coachman"},
+      {prompt:"Who performed pioneering laser cataract surgery work and founded the American Institute for the Prevention of Blindness?",type:"mc",choices:["Patricia Bath","Rebecca Lee Crumpler","Alexa Canady","Mary Eliza Mahoney"],answer:"Patricia Bath"},
+      {prompt:"Type the last name of the inventor: Granville T. ____",type:"input",answer:"Woods"},
+      {prompt:"Type the last name of educator: Mary McLeod ____",type:"input",answer:"Bethune"},
+      {prompt:"Who was the first Black woman to serve as a physician in the United States?",type:"mc",choices:["Rebecca Lee Crumpler","Patricia Bath","Alexa Canady","Mae Jemison"],answer:"Rebecca Lee Crumpler"},
+      {prompt:"Type the last name of the abolitionist author: Frederick ____",type:"input",answer:"Douglass"},
+      {prompt:"Who helped develop the three-light traffic signal and a gas mask safety hood?",type:"mc",choices:["Garrett Morgan","Lewis Latimer","Mark Dean","Benjamin Banneker"],answer:"Garrett Morgan"},
+      {prompt:"Type the last name of mathematician and NASA pioneer: Katherine ____",type:"input",answer:"Johnson"},
+      {prompt:"Who co-invented the IBM personal computer and holds multiple patents in computer engineering?",type:"mc",choices:["Mark Dean","Percy Julian","George Carruthers","Otis Boykin"],answer:"Mark Dean"},
+      {prompt:"Who invented the refrigerated truck system that helped food travel longer distances?",type:"mc",choices:["Frederick McKinley Jones","Garrett Morgan","Granville T. Woods","Norbert Rillieux"],answer:"Frederick McKinley Jones"}
+    ]
+  };
+
+  // ─── Theme Config ─────────────────────────────────────────────────────────
+  const themeConfig = {
+    mixed:       {title:"WGLT Knowledge Connect 4",       subtitle:"Turn Connect 4 into a classroom brain-battle. Answer spelling or math questions correctly to drop a checker.", label:"Mixed",         board1:"#0d3535",board2:"#071f1f"},
+    spelling:    {title:"WGLT Spelling Connect 4",        subtitle:"Spell it right to drop your checker. Race your opponent to connect four!",                                     label:"Spelling",      board1:"#1a4a2a",board2:"#0d2a16"},
+    math:        {title:"WGLT Math Connect 4",            subtitle:"Solve the math problem to earn your drop. Strategy meets arithmetic on the board.",                            label:"Math",          board1:"#3a2a0d",board2:"#221808"},
+    blackhistory:{title:"WGLT Black History Connect 4",   subtitle:"Answer Black history questions correctly to earn each drop. Strategy meets knowledge on the board.",           label:"Black History", board1:"#0d3535",board2:"#071f1f"}
+  };
+
+  // ─── Custom Questions (localStorage) ─────────────────────────────────────
+  // Structure: { spelling:{easy:[],medium:[],hard:[]}, math:{...}, blackhistory:{...} }
+  let customBank = loadCustomBank();
+
+  function loadCustomBank(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    } catch(e){}
+    return {
+      spelling:    {easy:[],medium:[],hard:[]},
+      math:        {easy:[],medium:[],hard:[]},
+      blackhistory:{easy:[],medium:[],hard:[]}
+    };
+  }
+
+  function saveCustomBank(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(customBank)); } catch(e){}
+  }
+
+  // ─── DOM References ───────────────────────────────────────────────────────
+  const boardEl         = document.getElementById("board");
+  const boardWrap       = document.getElementById("boardWrap");
+  const columnButtonsEl = document.getElementById("columnButtons");
+  const modalBackdrop   = document.getElementById("modalBackdrop");
+  const modalMeta       = document.getElementById("modalMeta");
+  const questionText    = document.getElementById("questionText");
+  const choicesWrap     = document.getElementById("choicesWrap");
+  const inputWrap       = document.getElementById("inputWrap");
+  const answerInput     = document.getElementById("answerInput");
+  const submitAnswerBtn = document.getElementById("submitAnswerBtn");
+  const feedbackEl      = document.getElementById("feedback");
+  const countdownText   = document.getElementById("countdownText");
+  const turnText        = document.getElementById("turnText");
+  const turnName        = document.getElementById("turnName");
+  const turnDisc        = document.getElementById("turnDisc");
+  const themeText       = document.getElementById("themeText");
+  const timerText       = document.getElementById("timerText");
+  const goalText        = document.getElementById("goalText");
+  const winLine         = document.getElementById("winLine");
+  const questionPreview = document.getElementById("questionPreview");
+  const gameTitle       = document.getElementById("gameTitle");
+  const gameSubtitle    = document.getElementById("gameSubtitle");
+  const themeSelect     = document.getElementById("themeSelect");
+  const difficultySelect= document.getElementById("difficultySelect");
+  const timerSelect     = document.getElementById("timerSelect");
+  const goalSelect      = document.getElementById("goalSelect");
+  const playerOneName   = document.getElementById("playerOneName");
+  const playerTwoName   = document.getElementById("playerTwoName");
+  const customModeToggle= document.getElementById("customModeToggle");
+  const editorBackdrop  = document.getElementById("editorBackdrop");
+
+  // ─── Event Listeners ──────────────────────────────────────────────────────
+  document.getElementById("startBtn").addEventListener("click", startGame);
+  document.getElementById("resetBtn").addEventListener("click", resetBoardOnly);
+  document.getElementById("sampleBtn").addEventListener("click", previewQuestions);
+  document.getElementById("closeModalBtn").addEventListener("click", closeQuestionModal);
+  document.getElementById("openEditorBtn").addEventListener("click", openEditor);
+  document.getElementById("closeEditorBtn").addEventListener("click", closeEditor);
+  submitAnswerBtn.addEventListener("click", submitTypedAnswer);
+  answerInput.addEventListener("keydown", e => { if(e.key === "Enter") submitTypedAnswer(); });
+  themeSelect.addEventListener("change", applyThemeUI);
+
+  // Editor tabs
+  document.querySelectorAll(".qe-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".qe-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".qe-section").forEach(s => s.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("qe-" + tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ─── Editor Functions ─────────────────────────────────────────────────────
+  function openEditor(){
+    renderAllLists();
+    editorBackdrop.classList.add("show");
+  }
+
+  function closeEditor(){
+    editorBackdrop.classList.remove("show");
+  }
+
+  // Show/hide MC fields based on type select
+  function toggleQEForm(prefix){
+    const type = document.getElementById(prefix + "-type").value;
+    const block = document.getElementById(prefix + "-mc-block");
+    if(block) block.style.display = type === "mc" ? "block" : "none";
+  }
+
+  function addCustomQuestion(theme){
+    const prefix = theme === "blackhistory" ? "bh" : theme === "spelling" ? "sp" : "ma";
+    const type   = document.getElementById(prefix + "-type").value;
+    const prompt = document.getElementById(prefix + "-prompt").value.trim();
+    const answer = document.getElementById(prefix + "-answer").value.trim();
+    const diff   = document.getElementById(prefix + "-diff").value;
+    const msgEl  = document.getElementById(prefix + "-msg");
+
+    if(!prompt){ showMsg(msgEl, "Please enter a question prompt.", false); return; }
+    if(!answer){ showMsg(msgEl, "Please enter the correct answer.", false); return; }
+
+    let q = { prompt, answer, type };
+
+    if(type === "mc"){
+      const w1 = document.getElementById(prefix + "-w1").value.trim();
+      const w2 = document.getElementById(prefix + "-w2").value.trim();
+      const w3 = document.getElementById(prefix + "-w3").value.trim();
+      if(!w1 || !w2 || !w3){ showMsg(msgEl, "Please fill in all 3 wrong choices for multiple choice.", false); return; }
+      const allChoices = shuffleArray([answer, w1, w2, w3]);
+      q.choices = allChoices;
+    }
+
+    customBank[theme][diff].push(q);
+    saveCustomBank();
+    renderList(theme);
+    updateCounts();
+
+    // Clear form
+    document.getElementById(prefix + "-prompt").value = "";
+    document.getElementById(prefix + "-answer").value = "";
+    ["w1","w2","w3"].forEach(w => {
+      const el = document.getElementById(prefix + "-" + w);
+      if(el) el.value = "";
+    });
+
+    showMsg(msgEl, "✓ Question saved!", true);
+  }
+
+  function deleteCustomQuestion(theme, diff, index){
+    customBank[theme][diff].splice(index, 1);
+    saveCustomBank();
+    renderList(theme);
+    updateCounts();
+  }
+
+  function renderList(theme){
+    const prefix = theme === "blackhistory" ? "bh" : theme === "spelling" ? "sp" : "ma";
+    const listEl = document.getElementById(prefix + "-list");
+    const diffs  = ["easy","medium","hard"];
+    listEl.innerHTML = "";
+
+    let total = 0;
+    diffs.forEach(diff => {
+      const qs = customBank[theme][diff];
+      total += qs.length;
+      qs.forEach((q, i) => {
+        const item = document.createElement("div");
+        item.className = "q-item";
+        const typeLabel = q.type === "mc" ? "Multiple Choice" : "Type-in";
+        const choicesPreview = q.type === "mc" ? ` · Choices: ${q.choices.join(", ")}` : "";
+        item.innerHTML = `
+          <div class="q-item-text">
+            <div>${q.prompt}</div>
+            <div class="q-item-meta">Answer: <strong>${q.answer}</strong>${choicesPreview} · ${capitalize(diff)} · ${typeLabel}</div>
+          </div>
+          <div class="q-item-actions">
+            <button class="icon-btn del" onclick="deleteCustomQuestion('${theme}','${diff}',${i})">✕</button>
+          </div>`;
+        listEl.appendChild(item);
+      });
+    });
+
+    if(total === 0){
+      listEl.innerHTML = `<div class="empty-state">No custom questions yet. Add one above!</div>`;
+    }
+  }
+
+  function renderAllLists(){
+    ["spelling","math","blackhistory"].forEach(renderList);
+    updateCounts();
+  }
+
+  function updateCounts(){
+    const counts = {
+      sp: totalCustom("spelling"),
+      ma: totalCustom("math"),
+      bh: totalCustom("blackhistory")
+    };
+    Object.entries(counts).forEach(([k,v]) => {
+      const el = document.getElementById(k + "-count");
+      if(el) el.textContent = v;
+    });
+  }
+
+  function totalCustom(theme){
+    return ["easy","medium","hard"].reduce((s, d) => s + customBank[theme][d].length, 0);
+  }
+
+  function clearAllCustom(){
+    if(!confirm("Clear ALL custom questions for all themes? This cannot be undone.")) return;
+    customBank = {
+      spelling:    {easy:[],medium:[],hard:[]},
+      math:        {easy:[],medium:[],hard:[]},
+      blackhistory:{easy:[],medium:[],hard:[]}
+    };
+    saveCustomBank();
+    renderAllLists();
+  }
+
+  function showMsg(el, msg, good){
+    el.textContent = msg;
+    el.className = "feedback " + (good ? "good" : "bad");
+    setTimeout(() => { el.textContent = ""; el.className = "feedback"; }, 2800);
+  }
+
+  // ─── Theme UI ─────────────────────────────────────────────────────────────
+  function applyThemeUI(){
+    const cfg = themeConfig[themeSelect.value];
+    gameTitle.textContent    = cfg.title;
+    gameSubtitle.textContent = cfg.subtitle;
+    themeText.textContent    = cfg.label;
+    boardWrap.style.background = `linear-gradient(180deg,${cfg.board1},${cfg.board2})`;
+  }
+
+  // ─── Board ────────────────────────────────────────────────────────────────
+  function initBoardState(){
+    board = Array.from({length:ROWS}, () => Array(COLS).fill(0));
+  }
+
+  function buildBoardUI(){
+    boardEl.innerHTML = "";
+    columnButtonsEl.innerHTML = "";
+    for(let c = 0; c < COLS; c++){
+      const btn = document.createElement("button");
+      btn.className = "drop-btn";
+      btn.textContent = c + 1;
+      btn.addEventListener("click", () => handleColumnClick(c));
+      columnButtonsEl.appendChild(btn);
+    }
+    for(let r = 0; r < ROWS; r++){
+      for(let c = 0; c < COLS; c++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        boardEl.appendChild(cell);
+      }
+    }
+    renderBoard();
+  }
+
+  function renderBoard(){
+    const cells = [...boardEl.children];
+    cells.forEach(cell => cell.innerHTML = "");
+    for(let r = 0; r < ROWS; r++){
+      for(let c = 0; c < COLS; c++){
+        if(board[r][c] !== 0){
+          const disc = document.createElement("div");
+          disc.className = "disc " + (board[r][c] === 1 ? "p1" : "p2");
+          cells[r * COLS + c].appendChild(disc);
+        }
+      }
+    }
+    updateTurnUI();
+    updateColumnAvailability();
+  }
+
+  // ─── Game Control ─────────────────────────────────────────────────────────
+  function startGame(){
+    CONNECT_GOAL = parseInt(goalSelect.value, 10);
+    initBoardState();
+    currentPlayer = 1;
+    gameStarted = true;
+    gameOver = false;
+    winLine.classList.remove("show");
+    winLine.textContent = "";
+    applyThemeUI();
+    timerText.textContent = parseInt(timerSelect.value,10) ? timerSelect.value + " sec" : "Off";
+    goalText.textContent  = CONNECT_GOAL;
+    buildBoardUI();
+    updateTurnUI();
+    updateColumnAvailability();
+    questionPreview.innerHTML = "<strong>Game live!</strong> Click a column to answer and drop.";
+  }
+
+  function resetBoardOnly(){
+    clearTimer();
+    closeQuestionModal();
+    initBoardState();
+    currentPlayer = 1;
+    gameOver = false;
+    if(!gameStarted) gameStarted = true;
+    winLine.classList.remove("show");
+    winLine.textContent = "";
+    buildBoardUI();
+    updateTurnUI();
+    updateColumnAvailability();
+  }
+
+  function updateTurnUI(){
+    const p1 = playerOneName.value.trim() || "Player 1";
+    const p2 = playerTwoName.value.trim() || "Player 2";
+    const name = currentPlayer === 1 ? p1 : p2;
+    document.getElementById("legend1").textContent = p1;
+    document.getElementById("legend2").textContent = p2;
+    turnText.textContent = gameOver ? "Game Over" : (gameStarted ? name : "Not started");
+    turnName.textContent = gameOver ? "Winner!" : (gameStarted ? name : "Press Start");
+    turnDisc.className   = "turn-disc " + (currentPlayer === 1 ? "p1" : "p2");
+  }
+
+  function updateColumnAvailability(){
+    [...columnButtonsEl.children].forEach((btn, c) => {
+      btn.disabled = !gameStarted || gameOver || board[0][c] !== 0;
+    });
+  }
+
+  // ─── Question Flow ────────────────────────────────────────────────────────
+  function handleColumnClick(col){
+    if(!gameStarted || gameOver || board[0][col] !== 0) return;
+    targetColumn = col;
+    askQuestionForTurn(col);
+  }
+
+  function askQuestionForTurn(col){
+    clearTimer();
+    currentQuestion = getQuestion();
+    if(!currentQuestion){
+      // No questions available — show warning and skip
+      alert("No questions available for the current theme/difficulty. Add custom questions or switch to Built-in mode.");
+      targetColumn = null;
+      return;
+    }
+
+    const activeName = currentPlayer === 1
+      ? (playerOneName.value.trim() || "Player 1")
+      : (playerTwoName.value.trim() || "Player 2");
+
+    modalMeta.textContent = `Column ${col + 1} · ${activeName}`;
+    questionText.textContent = currentQuestion.prompt;
+    feedbackEl.textContent = "";
+    feedbackEl.className = "feedback";
+    choicesWrap.innerHTML = "";
+    answerInput.value = "";
+
+    inputWrap.style.display   = currentQuestion.type === "input" ? "flex" : "none";
+    choicesWrap.style.display = currentQuestion.type === "mc"    ? "grid" : "none";
+
+    if(currentQuestion.type === "mc"){
+      currentQuestion.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = choice;
+        btn.addEventListener("click", () => checkAnswer(choice));
+        choicesWrap.appendChild(btn);
+      });
+    } else {
+      setTimeout(() => answerInput.focus(), 30);
+    }
+
+    modalBackdrop.classList.add("show");
+    startQuestionTimer();
+  }
+
+  function startQuestionTimer(){
+    const seconds = parseInt(timerSelect.value, 10);
+    if(!seconds){ countdownText.textContent = "No timer for this turn."; return; }
+    timeLeft = seconds;
+    countdownText.textContent = `Time left: ${timeLeft}s`;
+    timerId = setInterval(() => {
+      timeLeft--;
+      countdownText.textContent = `Time left: ${timeLeft}s`;
+      if(timeLeft <= 0){
+        clearTimer();
+        feedbackEl.textContent = "Time is up. Turn skipped.";
+        feedbackEl.className = "feedback bad";
+        setTimeout(() => { closeQuestionModal(); switchTurn(); }, 850);
+      }
+    }, 1000);
+  }
+
+  function clearTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+  function submitTypedAnswer(){ checkAnswer(answerInput.value.trim()); }
+  function normalize(v){ return String(v).trim().toLowerCase(); }
+
+  function checkAnswer(userAnswer){
+    if(!currentQuestion) return;
+    clearTimer();
+    const correct = normalize(userAnswer) === normalize(currentQuestion.answer);
+
+    if(correct){
+      feedbackEl.textContent = "Correct! Dropping your piece...";
+      feedbackEl.className = "feedback good";
+      const colToPlay    = targetColumn;
+      const playerToPlay = currentPlayer;
+      setTimeout(() => { closeQuestionModal(); dropPiece(colToPlay, playerToPlay); }, 500);
+    } else {
+      feedbackEl.textContent = `Not quite — the answer was: ${currentQuestion.answer}. Turn skipped.`;
+      feedbackEl.className = "feedback bad";
+      setTimeout(() => { closeQuestionModal(); switchTurn(); }, 1400);
+    }
+  }
+
+  function closeQuestionModal(){
+    clearTimer();
+    modalBackdrop.classList.remove("show");
+    currentQuestion = null;
+    targetColumn    = null;
+    countdownText.textContent = "";
+    feedbackEl.textContent    = "";
+    feedbackEl.className      = "feedback";
+  }
+
+  // ─── Game Logic ───────────────────────────────────────────────────────────
+  function dropPiece(col, player){
+    for(let r = ROWS - 1; r >= 0; r--){
+      if(board[r][col] === 0){
+        board[r][col] = player;
+        renderBoard();
+        if(checkWin(r, col, player)){
+          gameOver = true;
+          const name = player === 1
+            ? (playerOneName.value.trim() || "Player 1")
+            : (playerTwoName.value.trim() || "Player 2");
+          winLine.textContent = `🎉 ${name} wins by connecting ${CONNECT_GOAL}!`;
+          winLine.classList.add("show");
+          turnText.textContent = name;
+          turnName.textContent = name + " wins!";
+          return;
+        }
+        if(isBoardFull()){
+          gameOver = true;
+          winLine.textContent = "Board full — it's a draw!";
+          winLine.classList.add("show");
+          turnText.textContent = "Draw";
+          turnName.textContent = "No winner";
+          return;
+        }
+        switchTurn();
+        return;
+      }
+    }
+  }
+
+  function switchTurn(){ currentPlayer = currentPlayer === 1 ? 2 : 1; renderBoard(); }
+  function isBoardFull(){ return board[0].every(c => c !== 0); }
+
+  function checkWin(row, col, player){
+    const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+    for(const [dr,dc] of dirs){
+      if(1 + countDir(row,col,dr,dc,player) + countDir(row,col,-dr,-dc,player) >= CONNECT_GOAL) return true;
+    }
+    return false;
+  }
+
+  function countDir(row, col, dr, dc, player){
+    let r = row+dr, c = col+dc, n = 0;
+    while(r>=0&&r<ROWS&&c>=0&&c<COLS&&board[r][c]===player){ n++; r+=dr; c+=dc; }
+    return n;
+  }
+
+  // ─── Question Selection ───────────────────────────────────────────────────
+  function getQuestion(){
+    const theme      = themeSelect.value;
+    const diff       = difficultySelect.value;
+    const customOnly = customModeToggle.checked;
+
+    // Build pool
+    let pool = [];
+
+    if(customOnly){
+      // Only pull from custom bank for current theme(s)
+      if(theme === "mixed"){
+        pool = [
+          ...customBank.spelling[diff],
+          ...customBank.math[diff]
+        ];
+      } else {
+        pool = [...(customBank[theme]?.[diff] || [])];
+      }
+    } else {
+      // Mix built-in + custom
+      if(theme === "spelling"){
+        pool = [...spellingBank[diff], ...customBank.spelling[diff]];
+      } else if(theme === "math"){
+        pool = [...mathBank[diff], ...customBank.math[diff]];
+      } else if(theme === "blackhistory"){
+        pool = [...blackHistoryBank[diff], ...customBank.blackhistory[diff]];
+      } else {
+        // mixed
+        const spellingPool = [...spellingBank[diff], ...customBank.spelling[diff]];
+        const mathPool     = [...mathBank[diff],     ...customBank.math[diff]];
+        pool = Math.random() < 0.5 ? spellingPool : mathPool;
+      }
+    }
+
+    if(pool.length === 0) return null;
+    return randomItem(pool);
+  }
+
+  function previewQuestions(){
+    const theme = themeSelect.value;
+    const diff  = difficultySelect.value;
+    const customOnly = customModeToggle.checked;
+    const samples = [];
+
+    function pickSamples(builtIn, custom, count){
+      const pool = customOnly ? [...custom] : [...builtIn, ...custom];
+      shuffleArray(pool);
+      samples.push(...pool.slice(0, count));
+    }
+
+    if(theme === "blackhistory"){
+      pickSamples(blackHistoryBank[diff], customBank.blackhistory[diff], 3);
+    } else if(theme === "spelling"){
+      pickSamples(spellingBank[diff], customBank.spelling[diff], 3);
+    } else if(theme === "math"){
+      pickSamples(mathBank[diff], customBank.math[diff], 3);
+    } else {
+      pickSamples(spellingBank[diff], customBank.spelling[diff], 2);
+      pickSamples(mathBank[diff], customBank.math[diff], 1);
+    }
+
+    if(samples.length === 0){
+      questionPreview.innerHTML = "<strong>No questions found.</strong> Add custom questions or turn off Custom Only mode.";
+      return;
+    }
+
+    const modeNote = customOnly ? " <em>(Custom Only)</em>" : "";
+    questionPreview.innerHTML =
+      `<strong>Preview Questions${modeNote}:</strong><br>` +
+      samples.map(q => "• " + q.prompt + (q.type === "mc" ? " [" + q.choices.join(" / ") + "]" : "")).join("<br>");
+
+    applyThemeUI();
+    timerText.textContent = parseInt(timerSelect.value,10) ? timerSelect.value + " sec" : "Off";
+    goalText.textContent  = goalSelect.value;
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  function randomItem(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  function shuffleArray(arr){
+    for(let i = arr.length-1; i > 0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // IMPORT SYSTEM
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Pending parsed questions before the teacher confirms save
+  let pendingImport = { spelling: [], math: [], blackhistory: [] };
+
+  // Switch between Manual and Import sub-tabs inside each editor section
+  function switchSectionTab(theme, panel, clickedBtn) {
+    const prefix = theme === 'blackhistory' ? 'bh' : theme === 'spelling' ? 'sp' : 'ma';
+    const parentSection = document.getElementById('qe-' + theme);
+    parentSection.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+    clickedBtn.classList.add('active');
+
+    const manualEl = document.getElementById(prefix + '-manual');
+    const importEl = document.getElementById(prefix + '-import');
+    if (panel === 'manual') {
+      manualEl.classList.remove('hidden');
+      importEl.classList.remove('active');
+    } else {
+      manualEl.classList.add('hidden');
+      importEl.classList.add('active');
+    }
+  }
+
+  function clearImport(prefix) {
+    const textEl = document.getElementById(prefix + '-import-text');
+    const resultEl = document.getElementById(prefix + '-import-result');
+    const previewEl = document.getElementById(prefix + '-import-preview');
+    const saveBtnEl = document.getElementById(prefix + '-import-savebtn');
+    if (textEl) textEl.value = '';
+    if (resultEl) { resultEl.className = 'import-result'; resultEl.textContent = ''; }
+    if (previewEl) previewEl.innerHTML = '';
+    if (saveBtnEl) saveBtnEl.style.display = 'none';
+    const theme = prefix === 'sp' ? 'spelling' : prefix === 'ma' ? 'math' : 'blackhistory';
+    pendingImport[theme] = [];
+  }
+
+  // ─── SPELLING IMPORT ──────────────────────────────────────────────────────
+  // Generates two question types per word:
+  //   1. Fill-in-the-blank (type-in): randomly blanks out one letter
+  //   2. Multiple choice: correct word + 3 auto-generated misspellings
+
+  function parseSpellingImport() {
+    const raw = document.getElementById('sp-import-text').value;
+    const diff = document.getElementById('sp-import-diff').value;
+    const resultEl = document.getElementById('sp-import-result');
+    const previewEl = document.getElementById('sp-import-preview');
+    const saveBtnEl = document.getElementById('sp-import-savebtn');
+
+    const words = raw.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+    if (words.length === 0) {
+      showImportResult(resultEl, 'No words found. Paste at least one word.', true);
+      return;
+    }
+
+    const generated = [];
+    const errors = [];
+
+    words.forEach(word => {
+      if (/\s/.test(word)) {
+        errors.push(`Skipped "${word}" — use single words only`);
+        return;
+      }
+      const upper = word.toUpperCase();
+      const letters = upper.split('');
+
+      // Question 1: Fill-in-the-blank — pick a random non-first letter to blank
+      const blankIdx = Math.floor(Math.random() * (letters.length - 1)) + 1;
+      const blanked = letters.map((l, i) => i === blankIdx ? '_' : l).join(' ');
+      generated.push({
+        prompt: `Fill in the missing letter: ${blanked}`,
+        type: 'input',
+        answer: letters[blankIdx],
+        _display: `${word} → fill-in`
+      });
+
+      // Question 2: Multiple choice — correct + 3 misspellings
+      const misspellings = generateMisspellings(word, 3);
+      const choices = shuffleArray([word, ...misspellings]);
+      generated.push({
+        prompt: `Which is the correct spelling?`,
+        type: 'mc',
+        choices,
+        answer: word,
+        _display: `${word} → multiple choice`
+      });
+    });
+
+    pendingImport.spelling = generated.map(q => {
+      const clean = { ...q };
+      delete clean._display;
+      clean._diff = diff;
+      return clean;
+    });
+
+    const msg = `✓ Generated ${generated.length} questions from ${words.length} word${words.length !== 1 ? 's' : ''}` +
+      (errors.length ? ` · ${errors.length} skipped` : '');
+    showImportResult(resultEl, msg, false);
+
+    previewEl.innerHTML = '';
+    generated.forEach(q => {
+      const div = document.createElement('div');
+      div.className = 'parsed-item';
+      const badge = q.type === 'mc'
+        ? '<span class="mc-badge">MC</span>'
+        : '<span class="input-badge">Type-in</span>';
+      const choiceStr = q.type === 'mc' ? `<br><span style="color:var(--muted)">Choices: ${q.choices.join(', ')}</span>` : '';
+      div.innerHTML = `${q.prompt} ${badge}<br><span class="p-answer">Answer: ${q.answer}</span>${choiceStr}`;
+      previewEl.appendChild(div);
+    });
+
+    saveBtnEl.style.display = generated.length > 0 ? 'block' : 'none';
+
+    if (errors.length) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = 'color:#ff8f8f;font-size:.8rem;margin-top:6px;';
+      errDiv.textContent = errors.join(' · ');
+      previewEl.appendChild(errDiv);
+    }
+  }
+
+  function generateMisspellings(word, count) {
+    const variants = new Set();
+    const letters = word.split('');
+    const vowels = 'aeiou';
+    const attempts = 40;
+
+    for (let i = 0; i < attempts && variants.size < count; i++) {
+      let w = [...letters];
+      const op = Math.floor(Math.random() * 4);
+      const pos = Math.floor(Math.random() * w.length);
+
+      if (op === 0 && w.length > 2) {
+        // swap adjacent letters
+        const idx = Math.floor(Math.random() * (w.length - 1));
+        [w[idx], w[idx + 1]] = [w[idx + 1], w[idx]];
+      } else if (op === 1) {
+        // replace vowel with different vowel
+        const vIdx = w.findIndex((c, i) => i > 0 && vowels.includes(c.toLowerCase()));
+        if (vIdx > -1) {
+          const alt = vowels.replace(w[vIdx].toLowerCase(), '');
+          w[vIdx] = alt[Math.floor(Math.random() * alt.length)];
+        }
+      } else if (op === 2 && w.length > 3) {
+        // drop a non-first letter
+        w.splice(Math.max(1, pos), 1);
+      } else {
+        // add an extra letter
+        const alpha = 'abcdefghijklmnoprstln';
+        w.splice(Math.max(1, pos), 0, alpha[Math.floor(Math.random() * alpha.length)]);
+      }
+      const result = w.join('');
+      if (result !== word && result.length > 1) variants.add(result);
+    }
+
+    // Pad with obvious variants if needed
+    while (variants.size < count) {
+      variants.add(word + word[word.length - 1]);
+      if (variants.size < count) variants.add(word.slice(0, -1) + 'ee');
+      if (variants.size < count) variants.add(word + 'e');
+    }
+    return [...variants].slice(0, count);
+  }
+
+  // ─── MATH IMPORT ─────────────────────────────────────────────────────────
+  // Evaluates each expression, auto-generates MC wrong answers near correct value
+
+  function parseMathImport() {
+    const raw = document.getElementById('ma-import-text').value;
+    const diff = document.getElementById('ma-import-diff').value;
+    const qType = document.getElementById('ma-import-type').value;
+    const resultEl = document.getElementById('ma-import-result');
+    const previewEl = document.getElementById('ma-import-preview');
+    const saveBtnEl = document.getElementById('ma-import-savebtn');
+
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) {
+      showImportResult(resultEl, 'No problems found. Paste at least one expression.', true);
+      return;
+    }
+
+    const generated = [];
+    const errors = [];
+
+    lines.forEach(line => {
+      // Normalize × → * and ÷ → /
+      const expr = line.replace(/×/g, '*').replace(/÷/g, '/').replace(/[=?]/g, '').trim();
+      let result;
+      try {
+        // Safe eval: only allow digits, operators, parens, spaces
+        if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(expr)) throw new Error('Invalid characters');
+        result = Function('"use strict"; return (' + expr + ')')();
+        if (!isFinite(result)) throw new Error('Non-finite result');
+        result = Math.round(result * 1000) / 1000; // round to 3 decimal places
+      } catch(e) {
+        errors.push(`Could not solve: "${line}"`);
+        return;
+      }
+
+      // Build display prompt — restore nice operators
+      const displayExpr = line.replace(/\*/g, '×').replace(/\//g, '÷').replace(/[=?]$/,'').trim() + ' = ?';
+
+      if (qType === 'input') {
+        generated.push({ prompt: displayExpr, type: 'input', answer: String(result), _diff: diff });
+      } else {
+        const wrongs = generateMathWrongAnswers(result, 3);
+        const choices = shuffleArray([String(result), ...wrongs.map(String)]);
+        generated.push({ prompt: `Which answer is correct for ${displayExpr.replace(' = ?','')}?`, type: 'mc', choices, answer: String(result), _diff: diff });
+      }
+    });
+
+    pendingImport.math = generated;
+
+    const msg = `✓ Solved ${generated.length} problem${generated.length !== 1 ? 's' : ''}` +
+      (errors.length ? ` · ${errors.length} could not be solved` : '');
+    showImportResult(resultEl, msg, errors.length > 0 && generated.length === 0);
+
+    previewEl.innerHTML = '';
+    generated.forEach(q => {
+      const div = document.createElement('div');
+      div.className = 'parsed-item';
+      const badge = q.type === 'mc' ? '<span class="mc-badge">MC</span>' : '<span class="input-badge">Type-in</span>';
+      const choiceStr = q.type === 'mc' ? `<br><span style="color:var(--muted)">Choices: ${q.choices.join(', ')}</span>` : '';
+      div.innerHTML = `${q.prompt} ${badge}<br><span class="p-answer">Answer: ${q.answer}</span>${choiceStr}`;
+      previewEl.appendChild(div);
+    });
+
+    if (errors.length) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = 'color:#ff8f8f;font-size:.8rem;margin-top:6px;';
+      errDiv.innerHTML = errors.join('<br>');
+      previewEl.appendChild(errDiv);
+    }
+
+    saveBtnEl.style.display = generated.length > 0 ? 'block' : 'none';
+  }
+
+  function generateMathWrongAnswers(correct, count) {
+    const wrongs = new Set();
+    const isInt = Number.isInteger(correct);
+    const offsets = isInt
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 10, -1, -2, -3, -4, -5]
+      : [0.5, 1, 1.5, 2, -0.5, -1, -1.5];
+
+    for (const off of offsets) {
+      if (wrongs.size >= count) break;
+      const candidate = correct + off;
+      if (candidate !== correct && candidate > 0) wrongs.add(Math.round(candidate * 1000) / 1000);
+    }
+    // If still short, multiply/divide
+    if (wrongs.size < count) wrongs.add(Math.round(correct * 2));
+    if (wrongs.size < count) wrongs.add(Math.round(correct / 2));
+    return [...wrongs].slice(0, count);
+  }
+
+  // ─── BLACK HISTORY IMPORT ─────────────────────────────────────────────────
+  // Auto-detects format:
+  //   3 pipes → MC:    Question | Answer | Wrong1 | Wrong2 | Wrong3
+  //   1 pipe  → input: Question | Answer
+
+  function parseBHImport() {
+    const raw = document.getElementById('bh-import-text').value;
+    const diff = document.getElementById('bh-import-diff').value;
+    const resultEl = document.getElementById('bh-import-result');
+    const previewEl = document.getElementById('bh-import-preview');
+    const saveBtnEl = document.getElementById('bh-import-savebtn');
+
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) {
+      showImportResult(resultEl, 'No questions found. Paste at least one line.', true);
+      return;
+    }
+
+    const generated = [];
+    const errors = [];
+
+    lines.forEach((line, idx) => {
+      const parts = line.split('|').map(p => p.trim()).filter(p => p.length > 0);
+      if (parts.length < 2) {
+        errors.push(`Line ${idx + 1}: needs at least a question and answer separated by |`);
+        return;
+      }
+
+      const prompt = parts[0];
+      const answer = parts[1];
+
+      if (parts.length >= 5) {
+        // MC format: Question | Answer | Wrong1 | Wrong2 | Wrong3
+        const wrongs = parts.slice(2, 5);
+        const choices = shuffleArray([answer, ...wrongs]);
+        generated.push({ prompt, type: 'mc', choices, answer, _diff: diff });
+      } else if (parts.length >= 4) {
+        // MC with only 2 wrong answers — still make it work
+        const wrongs = parts.slice(2, 4);
+        const choices = shuffleArray([answer, ...wrongs]);
+        generated.push({ prompt, type: 'mc', choices, answer, _diff: diff });
+      } else {
+        // Simple type-in
+        generated.push({ prompt, type: 'input', answer, _diff: diff });
+      }
+    });
+
+    pendingImport.blackhistory = generated;
+
+    const mcCount = generated.filter(q => q.type === 'mc').length;
+    const inputCount = generated.filter(q => q.type === 'input').length;
+    const msg = `✓ Imported ${generated.length} question${generated.length !== 1 ? 's' : ''} — ${mcCount} multiple choice, ${inputCount} type-in` +
+      (errors.length ? ` · ${errors.length} line${errors.length !== 1 ? 's' : ''} skipped` : '');
+    showImportResult(resultEl, msg, errors.length > 0 && generated.length === 0);
+
+    previewEl.innerHTML = '';
+    generated.forEach(q => {
+      const div = document.createElement('div');
+      div.className = 'parsed-item';
+      const badge = q.type === 'mc' ? '<span class="mc-badge">MC</span>' : '<span class="input-badge">Type-in</span>';
+      const choiceStr = q.type === 'mc' ? `<br><span style="color:var(--muted)">Choices: ${q.choices.join(', ')}</span>` : '';
+      div.innerHTML = `${q.prompt} ${badge}<br><span class="p-answer">Answer: ${q.answer}</span>${choiceStr}`;
+      previewEl.appendChild(div);
+    });
+
+    if (errors.length) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = 'color:#ff8f8f;font-size:.8rem;margin-top:6px;';
+      errDiv.innerHTML = errors.join('<br>');
+      previewEl.appendChild(errDiv);
+    }
+
+    saveBtnEl.style.display = generated.length > 0 ? 'block' : 'none';
+  }
+
+  // ─── SAVE IMPORTED QUESTIONS ──────────────────────────────────────────────
+  function saveImport(theme) {
+    const pending = pendingImport[theme];
+    if (!pending || pending.length === 0) return;
+
+    pending.forEach(q => {
+      const diff = q._diff || 'medium';
+      const clean = { prompt: q.prompt, type: q.type, answer: q.answer };
+      if (q.type === 'mc') clean.choices = q.choices;
+      customBank[theme][diff].push(clean);
+    });
+
+    saveCustomBank();
+    renderList(theme);
+    updateCounts();
+
+    const prefix = theme === 'blackhistory' ? 'bh' : theme === 'spelling' ? 'sp' : 'ma';
+    const count = pending.length;
+    pendingImport[theme] = [];
+
+    const resultEl = document.getElementById(prefix + '-import-result');
+    showImportResult(resultEl, `✓ ${count} question${count !== 1 ? 's' : ''} saved to the question bank!`, false);
+    document.getElementById(prefix + '-import-preview').innerHTML = '';
+    document.getElementById(prefix + '-import-savebtn').style.display = 'none';
+    document.getElementById(prefix + '-import-text').value = '';
+  }
+
+  function showImportResult(el, msg, isError) {
+    el.textContent = msg;
+    el.className = 'import-result show' + (isError ? ' has-error' : '');
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  initBoardState();
+  buildBoardUI();
+  applyThemeUI();
+  updateCounts();
+  previewQuestions();
+</script>
+</body>
+</html>
