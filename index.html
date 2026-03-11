@@ -181,7 +181,7 @@
   .p2{ background:radial-gradient(circle at 35% 30%,#fff5cc 0%,#ffd761 18%,#c9952a 60%,#6b3a1f 100%); }
 
   /* ── Board ── */
-  .board-section{ padding:10px 14px 14px; }
+  .board-section{ padding:10px 14px 18px; }
   .board-shell{ overflow-x:auto; width:100%; -webkit-overflow-scrolling:touch; }
   .column-buttons,.board{
     display:grid;
@@ -195,10 +195,11 @@
     padding:0; border-radius:10px; min-height:42px;
   }
   .board-wrap{
-    margin-top:6px; border-radius:18px; padding:10px;
+    margin-top:6px; border-radius:18px; padding:10px 10px 14px;
     border:1px solid rgba(201,149,42,.2);
-    box-shadow:inset 0 -6px 0 rgba(0,0,0,.3),var(--shadow);
+    box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),var(--shadow);
     transition:background .4s ease;
+    overflow:hidden;
   }
   .cell{
     width:100%; aspect-ratio:1/1; border-radius:50%;
@@ -231,17 +232,20 @@
 
   /* ── Question Modal ── */
   .modal-backdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.82);
-    display:none; align-items:center; justify-content:center;
+    position:fixed; inset:0; background:rgba(0,0,0,.78);
+    display:none; align-items:flex-start; justify-content:center;
     padding:12px; z-index:9999;
+    padding-top:max(12px, env(safe-area-inset-top));
   }
   .modal-backdrop.show{ display:flex; }
+  /* Board-anchored modal: sits near top of visible area */
+  #modalBackdrop{ align-items:center; }
   .modal{
-    width:min(680px,100%);
+    width:min(620px,100%);
     background:linear-gradient(180deg,#111a1c,#080c0d);
     border-radius:20px; border:1px solid rgba(201,149,42,.25);
-    box-shadow:var(--shadow); padding:20px;
-    max-height:94vh; overflow-y:auto;
+    box-shadow:var(--shadow); padding:18px;
+    max-height:90vh; overflow-y:auto;
   }
   .modal h3{ margin:0 0 4px; font-size:1.25rem; color:var(--gold-light); }
   .modal p{ margin:10px 0; line-height:1.55; font-size:.95rem; }
@@ -350,7 +354,7 @@
     .row2,.mc-choices-grid{ grid-template-columns:1fr; }
     .column-buttons,.board{ gap:4px; }
     .drop-btn{ font-size:.8rem; height:38px; min-height:38px; }
-    .board-wrap{ padding:8px; border-radius:14px; }
+    .board-wrap{ padding:8px 8px 12px; border-radius:14px; }
     .btn-row button{ min-width:0; font-size:.85rem; padding:11px 12px; }
     .qe-tabs{ gap:5px; }
     .qe-tab{ padding:7px 11px; font-size:.82rem; }
@@ -797,14 +801,31 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
   // ─── Built-in Question Banks ──────────────────────────────────────────────
   const spellingBank = {
     easy:[
-      {prompt:"Choose the correct spelling.",type:"mc",choices:["inventor","invetor","inventer","invintor"],answer:"inventor"},
-      {prompt:"Choose the correct spelling.",type:"mc",choices:["leader","leeder","ledar","leadr"],answer:"leader"},
-      {prompt:"Fill in the missing letter: M _ T H",type:"input",answer:"A"},
-      {prompt:"Fill in the missing letter: S P E _ L",type:"input",answer:"L"},
-      {prompt:"Which is spelled correctly?",type:"mc",choices:["school","skool","schole","schoool"],answer:"school"},
-      {prompt:"Fill in the missing letter: B O O _",type:"input",answer:"K"},
-      {prompt:"Which is the correct word?",type:"mc",choices:["history","histary","historee","histery"],answer:"history"},
-      {prompt:"Fill in the missing letter: R E A _",type:"input",answer:"D"}
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["cat","kat","catt","katt"],answer:"cat"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["dog","dawg","dogg","doge"],answer:"dog"},
+      {prompt:"Fill in the missing letter: B _ G",type:"input",answer:"I"},
+      {prompt:"Fill in the missing letter: S U _",type:"input",answer:"N"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["run","runn","ron","rune"],answer:"run"},
+      {prompt:"Fill in the missing letter: H A _",type:"input",answer:"T"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["play","plae","plaay","plai"],answer:"play"},
+      {prompt:"Fill in the missing letter: F I _ H",type:"input",answer:"S"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["book","bok","booke","buk"],answer:"book"},
+      {prompt:"Fill in the missing letter: F R O _",type:"input",answer:"G"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["jump","jumb","juump","jamp"],answer:"jump"},
+      {prompt:"Fill in the missing letter: B I _ D",type:"input",answer:"R"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["friend","freind","frend","friand"],answer:"friend"},
+      {prompt:"Fill in the missing letter: S T A _",type:"input",answer:"R"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["said","sead","sed","sayd"],answer:"said"},
+      {prompt:"Fill in the missing letter: H E L _",type:"input",answer:"P"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["come","cum","kom","kome"],answer:"come"},
+      {prompt:"Fill in the missing letter: T H _ N K",type:"input",answer:"I"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["home","hoem","hom","homm"],answer:"home"},
+      {prompt:"Fill in the missing letter: G O O _",type:"input",answer:"D"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["water","watur","watr","wateer"],answer:"water"},
+      {prompt:"Fill in the missing letter: L O V _",type:"input",answer:"E"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["happy","hapy","hapie","heppy"],answer:"happy"},
+      {prompt:"Fill in the missing letter: T R _ E",type:"input",answer:"E"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["like","lyke","lik","liike"],answer:"like"}
     ],
     medium:[
       {prompt:"Choose the correct spelling.",type:"mc",choices:["engineer","enginer","enginere","engeeneer"],answer:"engineer"},
@@ -814,7 +835,24 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
       {prompt:"Which is spelled correctly?",type:"mc",choices:["scientist","scienctist","sientist","scintist"],answer:"scientist"},
       {prompt:"Fill in the missing letter: F I N A N _ E",type:"input",answer:"C"},
       {prompt:"Which is the correct word?",type:"mc",choices:["creative","creativ","creetive","creattive"],answer:"creative"},
-      {prompt:"Fill in the missing letter: M O T I _ A T I O N",type:"input",answer:"V"}
+      {prompt:"Fill in the missing letter: M O T I _ A T I O N",type:"input",answer:"V"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["library","librery","libary","librarie"],answer:"library"},
+      {prompt:"Fill in the missing letter: S T R A T E _ Y",type:"input",answer:"G"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["necessary","neccessary","necesary","neccesary"],answer:"necessary"},
+      {prompt:"Fill in the missing letter: B E H A V _ O R",type:"input",answer:"I"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["government","goverment","govenment","governmint"],answer:"government"},
+      {prompt:"Fill in the missing letter: E X P E R _ E N C E",type:"input",answer:"I"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["opinion","oppinion","opinnion","opinon"],answer:"opinion"},
+      {prompt:"Fill in the missing letter: S O C I E _ Y",type:"input",answer:"T"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["character","charcter","caracter","charracter"],answer:"character"},
+      {prompt:"Fill in the missing letter: P O S I T I _ E",type:"input",answer:"V"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["adventure","adventur","advenchure","adventture"],answer:"adventure"},
+      {prompt:"Fill in the missing letter: P R O B L _ M",type:"input",answer:"E"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["knowledge","knowlege","knolwedge","knowledje"],answer:"knowledge"},
+      {prompt:"Fill in the missing letter: C O U R A _ E",type:"input",answer:"G"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["together","togather","toogether","togother"],answer:"together"},
+      {prompt:"Fill in the missing letter: F A M I L _",type:"input",answer:"Y"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["important","importent","importint","improtant"],answer:"important"}
     ],
     hard:[
       {prompt:"Choose the correct spelling.",type:"mc",choices:["entrepreneur","enterpreneur","entrepeneur","entreprenuer"],answer:"entrepreneur"},
@@ -824,20 +862,54 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
       {prompt:"Which is spelled correctly?",type:"mc",choices:["mathematics","mathimatics","mathemattics","mathimattics"],answer:"mathematics"},
       {prompt:"Fill in the missing letter: I N S P I R A _ I O N",type:"input",answer:"T"},
       {prompt:"Which is the correct word?",type:"mc",choices:["innovation","innovashun","inovation","innnovation"],answer:"innovation"},
-      {prompt:"Fill in the missing letter: K N O W L E D _ E",type:"input",answer:"G"}
+      {prompt:"Fill in the missing letter: K N O W L E D _ E",type:"input",answer:"G"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["perseverance","perserverance","perseverence","persevearance"],answer:"perseverance"},
+      {prompt:"Fill in the missing letter: C O M M U N I C A _ I O N",type:"input",answer:"T"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["accomplishment","acomplishment","accomplishement","accompishment"],answer:"accomplishment"},
+      {prompt:"Fill in the missing letter: I N T E L L I G E N _ E",type:"input",answer:"C"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["circumstances","circumstanses","circumstancees","circmstances"],answer:"circumstances"},
+      {prompt:"Fill in the missing letter: D E T E R M I N A _ I O N",type:"input",answer:"T"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["prejudice","predjudice","prejudise","predgudice"],answer:"prejudice"},
+      {prompt:"Fill in the missing letter: S A C R I F _ C E",type:"input",answer:"I"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["exaggerate","exagerate","exaggerrate","exxaggerate"],answer:"exaggerate"},
+      {prompt:"Fill in the missing letter: O P P O R T U N _ T Y",type:"input",answer:"I"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["conscience","consience","consciense","conscince"],answer:"conscience"},
+      {prompt:"Fill in the missing letter: E M A N C I P A _ I O N",type:"input",answer:"T"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["civilization","civlization","civilizashun","civillization"],answer:"civilization"},
+      {prompt:"Fill in the missing letter: A D V O C A _ Y",type:"input",answer:"C"},
+      {prompt:"Which is spelled correctly?",type:"mc",choices:["extraordinary","extrodinary","extraordenary","extraordinery"],answer:"extraordinary"},
+      {prompt:"Fill in the missing letter: L E G I S L A _ I O N",type:"input",answer:"T"},
+      {prompt:"Choose the correct spelling.",type:"mc",choices:["perseverance","perserverance","perseverence","persevarance"],answer:"perseverance"}
     ]
   };
 
   const mathBank = {
     easy:[
-      {prompt:"4 + 5 = ?",type:"input",answer:"9"},
-      {prompt:"9 - 3 = ?",type:"input",answer:"6"},
-      {prompt:"Which answer is correct for 2 + 7?",type:"mc",choices:["8","9","10","11"],answer:"9"},
-      {prompt:"6 + 1 = ?",type:"input",answer:"7"},
-      {prompt:"10 - 4 = ?",type:"input",answer:"6"},
-      {prompt:"Which answer is correct for 3 + 3?",type:"mc",choices:["5","6","7","8"],answer:"6"},
-      {prompt:"8 - 2 = ?",type:"input",answer:"6"},
-      {prompt:"5 + 4 = ?",type:"input",answer:"9"}
+      {prompt:"1 + 1 = ?",type:"input",answer:"2"},
+      {prompt:"2 + 3 = ?",type:"input",answer:"5"},
+      {prompt:"Which answer is correct for 4 + 2?",type:"mc",choices:["5","6","7","8"],answer:"6"},
+      {prompt:"5 - 2 = ?",type:"input",answer:"3"},
+      {prompt:"3 + 4 = ?",type:"input",answer:"7"},
+      {prompt:"Which answer is correct for 6 - 1?",type:"mc",choices:["4","5","6","7"],answer:"5"},
+      {prompt:"8 - 3 = ?",type:"input",answer:"5"},
+      {prompt:"2 + 2 = ?",type:"input",answer:"4"},
+      {prompt:"Which answer is correct for 7 - 4?",type:"mc",choices:["2","3","4","5"],answer:"3"},
+      {prompt:"How many sides does a triangle have?",type:"mc",choices:["2","3","4","5"],answer:"3"},
+      {prompt:"1 + 9 = ?",type:"input",answer:"10"},
+      {prompt:"Which answer is correct for 5 + 5?",type:"mc",choices:["8","9","10","11"],answer:"10"},
+      {prompt:"6 + 3 = ?",type:"input",answer:"9"},
+      {prompt:"10 - 7 = ?",type:"input",answer:"3"},
+      {prompt:"Which answer is correct for 4 + 4?",type:"mc",choices:["6","7","8","9"],answer:"8"},
+      {prompt:"Count by 2s: 2, 4, 6, __ ?",type:"mc",choices:["7","8","9","10"],answer:"8"},
+      {prompt:"7 - 5 = ?",type:"input",answer:"2"},
+      {prompt:"Which answer is correct for 3 + 5?",type:"mc",choices:["6","7","8","9"],answer:"8"},
+      {prompt:"9 - 6 = ?",type:"input",answer:"3"},
+      {prompt:"How many legs does a dog have?",type:"mc",choices:["2","3","4","6"],answer:"4"},
+      {prompt:"5 + 3 = ?",type:"input",answer:"8"},
+      {prompt:"Which answer is correct for 10 - 3?",type:"mc",choices:["5","6","7","8"],answer:"7"},
+      {prompt:"2 + 6 = ?",type:"input",answer:"8"},
+      {prompt:"Count by 5s: 5, 10, 15, __ ?",type:"mc",choices:["18","19","20","21"],answer:"20"},
+      {prompt:"4 + 3 = ?",type:"input",answer:"7"}
     ],
     medium:[
       {prompt:"7 × 6 = ?",type:"input",answer:"42"},
@@ -847,7 +919,24 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
       {prompt:"36 ÷ 6 = ?",type:"input",answer:"6"},
       {prompt:"Which answer is correct for 14 + 13?",type:"mc",choices:["25","26","27","28"],answer:"27"},
       {prompt:"12 × 3 = ?",type:"input",answer:"36"},
-      {prompt:"50 - 18 = ?",type:"input",answer:"32"}
+      {prompt:"50 - 18 = ?",type:"input",answer:"32"},
+      {prompt:"6 × 7 = ?",type:"input",answer:"42"},
+      {prompt:"Which answer is correct for 64 ÷ 8?",type:"mc",choices:["6","7","8","9"],answer:"8"},
+      {prompt:"11 × 4 = ?",type:"input",answer:"44"},
+      {prompt:"72 ÷ 9 = ?",type:"input",answer:"8"},
+      {prompt:"Which answer is correct for 25 + 37?",type:"mc",choices:["60","61","62","63"],answer:"62"},
+      {prompt:"9 × 8 = ?",type:"input",answer:"72"},
+      {prompt:"100 - 45 = ?",type:"input",answer:"55"},
+      {prompt:"Which answer is correct for 7 × 9?",type:"mc",choices:["54","61","63","65"],answer:"63"},
+      {prompt:"48 ÷ 6 = ?",type:"input",answer:"8"},
+      {prompt:"13 × 5 = ?",type:"input",answer:"65"},
+      {prompt:"Which answer is correct for 81 ÷ 9?",type:"mc",choices:["7","8","9","10"],answer:"9"},
+      {prompt:"6 × 8 = ?",type:"input",answer:"48"},
+      {prompt:"75 - 28 = ?",type:"input",answer:"47"},
+      {prompt:"Which answer is correct for 11 × 6?",type:"mc",choices:["64","65","66","67"],answer:"66"},
+      {prompt:"54 ÷ 6 = ?",type:"input",answer:"9"},
+      {prompt:"7 × 8 = ?",type:"input",answer:"56"},
+      {prompt:"Which answer is correct for 35 + 46?",type:"mc",choices:["79","80","81","82"],answer:"81"}
     ],
     hard:[
       {prompt:"(9 × 3) - 4 = ?",type:"input",answer:"23"},
@@ -857,50 +946,112 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
       {prompt:"(18 + 6) ÷ 3 = ?",type:"input",answer:"8"},
       {prompt:"Which answer is correct for 11 × 11?",type:"mc",choices:["111","121","131","141"],answer:"121"},
       {prompt:"(5 × 8) + 17 = ?",type:"input",answer:"57"},
-      {prompt:"96 ÷ 12 = ?",type:"input",answer:"8"}
+      {prompt:"96 ÷ 12 = ?",type:"input",answer:"8"},
+      {prompt:"13 × 13 = ?",type:"input",answer:"169"},
+      {prompt:"Which answer is correct for (7 × 6) - 15?",type:"mc",choices:["25","26","27","28"],answer:"27"},
+      {prompt:"(100 - 36) ÷ 8 = ?",type:"input",answer:"8"},
+      {prompt:"14 × 6 = ?",type:"input",answer:"84"},
+      {prompt:"Which answer is correct for 3² + 4²?",type:"mc",choices:["23","24","25","26"],answer:"25"},
+      {prompt:"(12 × 5) - 18 = ?",type:"input",answer:"42"},
+      {prompt:"144 ÷ 12 = ?",type:"input",answer:"12"},
+      {prompt:"Which answer is correct for (9 + 6) × 4?",type:"mc",choices:["56","58","60","62"],answer:"60"},
+      {prompt:"17 × 8 = ?",type:"input",answer:"136"},
+      {prompt:"(48 ÷ 6) + (7 × 3) = ?",type:"input",answer:"29"},
+      {prompt:"Which answer is correct for 225 ÷ 15?",type:"mc",choices:["13","14","15","16"],answer:"15"},
+      {prompt:"(11 × 9) - 27 = ?",type:"input",answer:"72"},
+      {prompt:"19 × 7 = ?",type:"input",answer:"133"},
+      {prompt:"Which answer is correct for (6² - 4) ÷ 4?",type:"mc",choices:["7","8","9","10"],answer:"8"},
+      {prompt:"(25 × 4) ÷ (5 × 2) = ?",type:"input",answer:"10"},
+      {prompt:"16 × 9 = ?",type:"input",answer:"144"},
+      {prompt:"Which answer is correct for (8 × 7) + (6 × 5)?",type:"mc",choices:["84","85","86","87"],answer:"86"}
     ]
   };
 
   const blackHistoryBank = {
     easy:[
-      {prompt:"Who invented the traffic light?",type:"mc",choices:["Garrett Morgan","George Washington Carver","Benjamin Banneker","Lonnie Johnson"],answer:"Garrett Morgan"},
-      {prompt:"Who became the first Black woman in space?",type:"mc",choices:["Mae Jemison","Bessie Coleman","Katherine Johnson","Shirley Chisholm"],answer:"Mae Jemison"},
-      {prompt:"Who was a famous conductor on the Underground Railroad?",type:"mc",choices:["Harriet Tubman","Rosa Parks","Ida B. Wells","Mary McLeod Bethune"],answer:"Harriet Tubman"},
-      {prompt:"Who refused to give up her seat on a Montgomery bus?",type:"mc",choices:["Rosa Parks","Coretta Scott King","Ella Baker","Maya Angelou"],answer:"Rosa Parks"},
-      {prompt:"Type the last name of the inventor known for the Super Soaker: Lonnie ____",type:"input",answer:"Johnson"},
-      {prompt:"Type the last name of the first Black woman in space: Mae ____",type:"input",answer:"Jemison"},
-      {prompt:"Who made major contributions to NASA calculations for space missions?",type:"mc",choices:["Katherine Johnson","Madam C.J. Walker","Wilma Rudolph","Gwendolyn Brooks"],answer:"Katherine Johnson"},
-      {prompt:"Type the last name of the civil rights leader: Martin Luther King, ____",type:"input",answer:"Jr"}
+      {prompt:"Who invented the traffic light?",type:"mc",choices:["Garrett Morgan","Benjamin Banneker","Lonnie Johnson","George Washington Carver"],answer:"Garrett Morgan"},
+      {prompt:"Who was the first Black woman in space?",type:"mc",choices:["Mae Jemison","Bessie Coleman","Katherine Johnson","Shirley Chisholm"],answer:"Mae Jemison"},
+      {prompt:"Who helped people escape slavery on the Underground Railroad?",type:"mc",choices:["Harriet Tubman","Rosa Parks","Ida B. Wells","Sojourner Truth"],answer:"Harriet Tubman"},
+      {prompt:"Who refused to give up her seat on a bus and helped start a civil rights boycott?",type:"mc",choices:["Rosa Parks","Coretta Scott King","Ella Baker","Maya Angelou"],answer:"Rosa Parks"},
+      {prompt:"Who invented the Super Soaker water gun?",type:"mc",choices:["Lonnie Johnson","Garrett Morgan","Lewis Latimer","Mark Dean"],answer:"Lonnie Johnson"},
+      {prompt:"Who was a great leader who said 'I Have a Dream'?",type:"mc",choices:["Martin Luther King Jr.","Malcolm X","Barack Obama","John Lewis"],answer:"Martin Luther King Jr."},
+      {prompt:"What did Katherine Johnson do at NASA?",type:"mc",choices:["Did math calculations for space missions","Built rockets","Drove the space shuttle","Designed spacesuits"],answer:"Did math calculations for space missions"},
+      {prompt:"Type the last name of the civil rights leader: Rosa ___",type:"input",answer:"Parks"},
+      {prompt:"Who was the first African American President of the United States?",type:"mc",choices:["Barack Obama","Colin Powell","Jesse Jackson","Al Sharpton"],answer:"Barack Obama"},
+      {prompt:"Type the last name: Martin Luther King ___",type:"input",answer:"Jr"},
+      {prompt:"Who invented peanut butter and many other peanut products?",type:"mc",choices:["George Washington Carver","Booker T. Washington","Frederick Douglass","W.E.B. Du Bois"],answer:"George Washington Carver"},
+      {prompt:"Type the last name of the space pioneer: Mae ___",type:"input",answer:"Jemison"},
+      {prompt:"What color are the stripes on the American flag?",type:"mc",choices:["Red and White","Blue and White","Red and Blue","Green and White"],answer:"Red and White"},
+      {prompt:"Who wrote many famous poems and was called the 'Voice of Black America'?",type:"mc",choices:["Maya Angelou","Toni Morrison","Zora Neale Hurston","Alice Walker"],answer:"Maya Angelou"},
+      {prompt:"Type the last name: Harriet ___",type:"input",answer:"Tubman"},
+      {prompt:"What sport did Jackie Robinson become famous for playing?",type:"mc",choices:["Baseball","Basketball","Football","Tennis"],answer:"Baseball"},
+      {prompt:"Type the last name: George Washington ___",type:"input",answer:"Carver"},
+      {prompt:"Who was the first Black woman to fly an airplane?",type:"mc",choices:["Bessie Coleman","Mae Jemison","Amelia Earhart","Katherine Johnson"],answer:"Bessie Coleman"},
+      {prompt:"What does the Underground Railroad refer to?",type:"mc",choices:["A secret path to freedom for enslaved people","A subway system","A railroad under a river","A mining tunnel"],answer:"A secret path to freedom for enslaved people"},
+      {prompt:"Type the last name: Lonnie ___",type:"input",answer:"Johnson"},
+      {prompt:"Who is shown on the U.S. penny?",type:"mc",choices:["Abraham Lincoln","George Washington","Thomas Jefferson","Benjamin Franklin"],answer:"Abraham Lincoln"},
+      {prompt:"Type the last name: Garrett ___",type:"input",answer:"Morgan"},
+      {prompt:"Who helped lead the Montgomery Bus Boycott along with Rosa Parks?",type:"mc",choices:["Martin Luther King Jr.","Malcolm X","John Lewis","Thurgood Marshall"],answer:"Martin Luther King Jr."},
+      {prompt:"Type the last name: Katherine ___",type:"input",answer:"Johnson"},
+      {prompt:"What holiday in February celebrates Black history and achievements?",type:"mc",choices:["Black History Month","Juneteenth","Kwanzaa","Martin Luther King Day"],answer:"Black History Month"}
     ],
     medium:[
-      {prompt:"Who founded a successful hair care business and became one of America's first self-made women millionaires?",type:"mc",choices:["Madam C.J. Walker","Bessie Coleman","Mary McLeod Bethune","Alice Coachman"],answer:"Madam C.J. Walker"},
-      {prompt:"Who was the first Black woman elected to Congress?",type:"mc",choices:["Shirley Chisholm","Kamala Harris","Barbara Jordan","Fannie Lou Hamer"],answer:"Shirley Chisholm"},
-      {prompt:"Who was the first Black woman to earn a pilot's license?",type:"mc",choices:["Bessie Coleman","Mae Jemison","Ida B. Wells","Ruby Bridges"],answer:"Bessie Coleman"},
-      {prompt:"Who developed hundreds of uses for peanuts and sweet potatoes?",type:"mc",choices:["George Washington Carver","Elijah McCoy","Lewis Latimer","Percy Julian"],answer:"George Washington Carver"},
-      {prompt:"Type the last name of the activist and journalist: Ida B. ____",type:"input",answer:"Wells"},
-      {prompt:"Type the last name of the poet: Maya ____",type:"input",answer:"Angelou"},
-      {prompt:"Who improved the incandescent light bulb and worked with Alexander Graham Bell?",type:"mc",choices:["Lewis Latimer","Granville T. Woods","Elijah McCoy","Mark Dean"],answer:"Lewis Latimer"},
-      {prompt:"Who was known as the 'Father of Black History'?",type:"mc",choices:["Carter G. Woodson","W.E.B. Du Bois","Booker T. Washington","Frederick Douglass"],answer:"Carter G. Woodson"},
-      {prompt:"Type the last name of Supreme Court Justice Thurgood ____",type:"input",answer:"Marshall"},
-      {prompt:"Who invented the home security system in 1966?",type:"mc",choices:["Marie Van Brittan Brown","Annie Malone","Sarah Boone","Patricia Bath"],answer:"Marie Van Brittan Brown"}
+      {prompt:"Who founded a hair care business and became one of America's first self-made female millionaires?",type:"mc",choices:["Madam C.J. Walker","Bessie Coleman","Mary McLeod Bethune","Alice Coachman"],answer:"Madam C.J. Walker"},
+      {prompt:"Who was the first Black woman elected to Congress?",type:"mc",choices:["Shirley Chisholm","Barbara Jordan","Fannie Lou Hamer","Kamala Harris"],answer:"Shirley Chisholm"},
+      {prompt:"Who invented the home security system in 1966?",type:"mc",choices:["Marie Van Brittan Brown","Sarah Boone","Annie Malone","Patricia Bath"],answer:"Marie Van Brittan Brown"},
+      {prompt:"Who improved the light bulb carbon filament and worked with Thomas Edison and Alexander Graham Bell?",type:"mc",choices:["Lewis Latimer","Granville T. Woods","Elijah McCoy","Mark Dean"],answer:"Lewis Latimer"},
+      {prompt:"Who was known as the 'Father of Black History' and started Negro History Week?",type:"mc",choices:["Carter G. Woodson","W.E.B. Du Bois","Booker T. Washington","Frederick Douglass"],answer:"Carter G. Woodson"},
+      {prompt:"Who was the first Black Supreme Court Justice?",type:"mc",choices:["Thurgood Marshall","Clarence Thomas","John Lewis","Barack Obama"],answer:"Thurgood Marshall"},
+      {prompt:"What landmark document freed enslaved people in Confederate states in 1863?",type:"mc",choices:["The Emancipation Proclamation","The Bill of Rights","The Constitution","The Declaration of Independence"],answer:"The Emancipation Proclamation"},
+      {prompt:"Fill in the blank: Shirley Chisholm was the first Black woman elected to ___",type:"input",answer:"Congress"},
+      {prompt:"Who painted the 'Migration Series' showing the Great Migration of Black Americans?",type:"mc",choices:["Jacob Lawrence","Romare Bearden","Aaron Douglas","Jean-Michel Basquiat"],answer:"Jacob Lawrence"},
+      {prompt:"Fill in the blank: The Montgomery Bus ___ was a civil rights protest.",type:"input",answer:"Boycott"},
+      {prompt:"Who co-founded the NAACP and wrote 'The Souls of Black Folk'?",type:"mc",choices:["W.E.B. Du Bois","Booker T. Washington","Frederick Douglass","Marcus Garvey"],answer:"W.E.B. Du Bois"},
+      {prompt:"Fill in the blank: Madam C.J. Walker's real first name was ___",type:"input",answer:"Sarah"},
+      {prompt:"What law passed in 1964 banned discrimination based on race, color, religion, or national origin?",type:"mc",choices:["The Civil Rights Act","The Voting Rights Act","The Emancipation Proclamation","The 13th Amendment"],answer:"The Civil Rights Act"},
+      {prompt:"Who was the first Black woman to win an Olympic gold medal in track and field?",type:"mc",choices:["Alice Coachman","Wilma Rudolph","Florence Griffith Joyner","Althea Gibson"],answer:"Alice Coachman"},
+      {prompt:"Fill in the blank: Frederick Douglass escaped slavery and became a famous ___",type:"input",answer:"Abolitionist"},
+      {prompt:"Who founded the Tuskegee Institute to educate Black Americans?",type:"mc",choices:["Booker T. Washington","Frederick Douglass","W.E.B. Du Bois","Carter G. Woodson"],answer:"Booker T. Washington"},
+      {prompt:"Fill in the blank: The 13th Amendment to the Constitution abolished ___",type:"input",answer:"Slavery"},
+      {prompt:"Who was the first Black tennis player to win Wimbledon?",type:"mc",choices:["Althea Gibson","Serena Williams","Venus Williams","Arthur Ashe"],answer:"Althea Gibson"},
+      {prompt:"Who was the poet who read her original poem at President Biden's inauguration?",type:"mc",choices:["Amanda Gorman","Nikki Giovanni","Sonia Sanchez","Maya Angelou"],answer:"Amanda Gorman"},
+      {prompt:"Fill in the blank: Carter G. Woodson started ___ History Week.",type:"input",answer:"Negro"},
+      {prompt:"Who invented a lubrication system for steam engines that was so reliable people called it 'the real McCoy'?",type:"mc",choices:["Elijah McCoy","Garrett Morgan","Lewis Latimer","Granville T. Woods"],answer:"Elijah McCoy"},
+      {prompt:"Fill in the blank: Thurgood Marshall was the first Black ___ Court Justice.",type:"input",answer:"Supreme"},
+      {prompt:"What was the name of the famous speech Martin Luther King Jr. gave in Washington D.C. in 1963?",type:"mc",choices:["I Have a Dream","Free at Last","Letter from Birmingham Jail","Beyond Vietnam"],answer:"I Have a Dream"},
+      {prompt:"Who established the Bethune-Cookman school for Black students in Florida?",type:"mc",choices:["Mary McLeod Bethune","Harriet Tubman","Sojourner Truth","Ida B. Wells"],answer:"Mary McLeod Bethune"},
+      {prompt:"Fill in the blank: Lewis Latimer improved the ___ bulb's carbon filament.",type:"input",answer:"Light"}
     ],
     hard:[
-      {prompt:"Who patented an improved ironing board in 1892?",type:"mc",choices:["Sarah Boone","Madam C.J. Walker","Mary Jackson","Alice Ball"],answer:"Sarah Boone"},
-      {prompt:"Who invented a better way to lubricate steam engines, leading to the phrase 'the real McCoy'?",type:"mc",choices:["Elijah McCoy","Lewis Latimer","Percy Julian","Garrett Morgan"],answer:"Elijah McCoy"},
-      {prompt:"Who became the first Black woman to win an Olympic gold medal?",type:"mc",choices:["Alice Coachman","Florence Griffith Joyner","Wilma Rudolph","Althea Gibson"],answer:"Alice Coachman"},
-      {prompt:"Who performed pioneering laser cataract surgery work and founded the American Institute for the Prevention of Blindness?",type:"mc",choices:["Patricia Bath","Rebecca Lee Crumpler","Alexa Canady","Mary Eliza Mahoney"],answer:"Patricia Bath"},
-      {prompt:"Type the last name of the inventor: Granville T. ____",type:"input",answer:"Woods"},
-      {prompt:"Type the last name of educator: Mary McLeod ____",type:"input",answer:"Bethune"},
-      {prompt:"Who was the first Black woman to serve as a physician in the United States?",type:"mc",choices:["Rebecca Lee Crumpler","Patricia Bath","Alexa Canady","Mae Jemison"],answer:"Rebecca Lee Crumpler"},
-      {prompt:"Type the last name of the abolitionist author: Frederick ____",type:"input",answer:"Douglass"},
-      {prompt:"Who helped develop the three-light traffic signal and a gas mask safety hood?",type:"mc",choices:["Garrett Morgan","Lewis Latimer","Mark Dean","Benjamin Banneker"],answer:"Garrett Morgan"},
-      {prompt:"Type the last name of mathematician and NASA pioneer: Katherine ____",type:"input",answer:"Johnson"},
-      {prompt:"Who co-invented the IBM personal computer and holds multiple patents in computer engineering?",type:"mc",choices:["Mark Dean","Percy Julian","George Carruthers","Otis Boykin"],answer:"Mark Dean"},
-      {prompt:"Who invented the refrigerated truck system that helped food travel longer distances?",type:"mc",choices:["Frederick McKinley Jones","Garrett Morgan","Granville T. Woods","Norbert Rillieux"],answer:"Frederick McKinley Jones"}
+      {prompt:"Who patented an improved ironing board in 1892, becoming one of the first Black women inventors on record?",type:"mc",choices:["Sarah Boone","Madam C.J. Walker","Mary Jackson","Alice Ball"],answer:"Sarah Boone"},
+      {prompt:"Who performed pioneering laser cataract surgery work and co-invented the Laserphaco Probe?",type:"mc",choices:["Patricia Bath","Rebecca Lee Crumpler","Alexa Canady","Mae Jemison"],answer:"Patricia Bath"},
+      {prompt:"Who was the first African American woman to receive a medical degree in the United States?",type:"mc",choices:["Rebecca Lee Crumpler","Patricia Bath","Alexa Canady","Mary Eliza Mahoney"],answer:"Rebecca Lee Crumpler"},
+      {prompt:"Who co-invented the IBM personal computer architecture and holds over 20 patents?",type:"mc",choices:["Mark Dean","Percy Julian","Otis Boykin","Philip Emeagwali"],answer:"Mark Dean"},
+      {prompt:"Fill in the blank: Granville T. Woods invented a telegraph system called the ___phone Multiplex Telegraph.",type:"input",answer:"Tele"},
+      {prompt:"Who invented the refrigerated truck system that revolutionized food transport across America?",type:"mc",choices:["Frederick McKinley Jones","Garrett Morgan","Norbert Rillieux","Elijah McCoy"],answer:"Frederick McKinley Jones"},
+      {prompt:"What amendment to the U.S. Constitution granted Black men the right to vote in 1870?",type:"mc",choices:["15th Amendment","13th Amendment","14th Amendment","19th Amendment"],answer:"15th Amendment"},
+      {prompt:"Fill in the blank: Mary McLeod Bethune founded the Bethune-Cookman ___ in Florida.",type:"input",answer:"College"},
+      {prompt:"Who used chemistry to synthesize cortisone and other steroids, revolutionizing medicine?",type:"mc",choices:["Percy Julian","Charles Drew","Daniel Hale Williams","Louis Tompkins Wright"],answer:"Percy Julian"},
+      {prompt:"Fill in the blank: The 14th Amendment granted ___ to formerly enslaved people.",type:"input",answer:"Citizenship"},
+      {prompt:"Who performed the first successful open-heart surgery in 1893 at Provident Hospital in Chicago?",type:"mc",choices:["Daniel Hale Williams","Charles Drew","Louis Tompkins Wright","Percy Julian"],answer:"Daniel Hale Williams"},
+      {prompt:"Who organized the blood bank system used by the American Red Cross during World War II?",type:"mc",choices:["Charles Drew","Daniel Hale Williams","Percy Julian","Louis Tompkins Wright"],answer:"Charles Drew"},
+      {prompt:"Fill in the blank: Booker T. Washington founded the Tuskegee ___ in Alabama.",type:"input",answer:"Institute"},
+      {prompt:"Who became the first Black woman to serve as U.S. Vice President?",type:"mc",choices:["Kamala Harris","Shirley Chisholm","Condoleezza Rice","Hillary Clinton"],answer:"Kamala Harris"},
+      {prompt:"What 1954 Supreme Court case ruled racial segregation in public schools unconstitutional?",type:"mc",choices:["Brown v. Board of Education","Plessy v. Ferguson","Roe v. Wade","Marbury v. Madison"],answer:"Brown v. Board of Education"},
+      {prompt:"Fill in the blank: Plessy v. Ferguson established the ___-but-equal doctrine.",type:"input",answer:"Separate"},
+      {prompt:"Who was the first African American astronaut to walk in open space during a spacewalk?",type:"mc",choices:["Bernard Harris","Guion Bluford","Robert Henry Lawrence","Mae Jemison"],answer:"Bernard Harris"},
+      {prompt:"Fill in the blank: The ___ Project was a WWII program that trained African American military pilots at Tuskegee.",type:"input",answer:"Tuskegee"},
+      {prompt:"Who wrote 'Their Eyes Were Watching God,' a landmark of African American literature?",type:"mc",choices:["Zora Neale Hurston","Toni Morrison","Alice Walker","Lorraine Hansberry"],answer:"Zora Neale Hurston"},
+      {prompt:"Fill in the blank: The Harlem ___ was a 1920s cultural movement of Black art, music, and literature.",type:"input",answer:"Renaissance"},
+      {prompt:"Who won the Nobel Peace Prize in 1993 and is the only African American woman to win the Nobel Prize in Literature?",type:"mc",choices:["Toni Morrison","Maya Angelou","Alice Walker","Zora Neale Hurston"],answer:"Toni Morrison"},
+      {prompt:"Fill in the blank: John Lewis was a civil rights leader who later served as a U.S. ___ from Georgia.",type:"input",answer:"Congressman"},
+      {prompt:"Who founded the Pan-African movement and created the Universal Negro Improvement Association (UNIA)?",type:"mc",choices:["Marcus Garvey","W.E.B. Du Bois","Booker T. Washington","Langston Hughes"],answer:"Marcus Garvey"},
+      {prompt:"Fill in the blank: Ida B. Wells was a journalist who led a campaign against ___.",type:"input",answer:"Lynching"},
+      {prompt:"Who was the first Black woman to serve as U.S. Secretary of State?",type:"mc",choices:["Condoleezza Rice","Kamala Harris","Shirley Chisholm","Barbara Jordan"],answer:"Condoleezza Rice"}
     ]
   };
 
-  // ─── Theme Config ─────────────────────────────────────────────────────────
+    // ─── Theme Config ─────────────────────────────────────────────────────────
   const themeConfig = {
     mixed:       {title:"WGLT Knowledge Connect 4",       subtitle:"Turn Connect 4 into a classroom brain-battle. Answer spelling or math questions correctly to drop a checker.", label:"Mixed",         board1:"#0d3535",board2:"#071f1f"},
     spelling:    {title:"WGLT Spelling Connect 4",        subtitle:"Spell it right to drop your checker. Race your opponent to connect four!",                                     label:"Spelling",      board1:"#1a4a2a",board2:"#0d2a16"},
@@ -1256,6 +1407,11 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
     }
 
     modalBackdrop.classList.add("show");
+    // Scroll the board card into view so the modal appears over it
+    const boardCard = document.getElementById("boardWrap");
+    if(boardCard){
+      boardCard.scrollIntoView({ behavior:"smooth", block:"center" });
+    }
     startQuestionTimer();
   }
 
@@ -1271,7 +1427,7 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
         clearTimer();
         feedbackEl.textContent = "Time is up. Turn skipped.";
         feedbackEl.className = "feedback bad";
-        setTimeout(() => { closeQuestionModal(); switchTurn(); }, 850);
+        setTimeout(() => { closeQuestionModal(); scrollToBoard(); switchTurn(); }, 850);
       }
     }, 1000);
   }
@@ -1290,11 +1446,18 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
       feedbackEl.className = "feedback good";
       const colToPlay    = targetColumn;
       const playerToPlay = currentPlayer;
-      setTimeout(() => { closeQuestionModal(); dropPiece(colToPlay, playerToPlay); }, 500);
+      setTimeout(() => { closeQuestionModal(); scrollToBoard(); dropPiece(colToPlay, playerToPlay); }, 500);
     } else {
       feedbackEl.textContent = `Not quite — the answer was: ${currentQuestion.answer}. Turn skipped.`;
       feedbackEl.className = "feedback bad";
-      setTimeout(() => { closeQuestionModal(); switchTurn(); }, 1400);
+      setTimeout(() => { closeQuestionModal(); scrollToBoard(); switchTurn(); }, 1400);
+    }
+  }
+
+  function scrollToBoard(){
+    const boardCard = document.getElementById("boardWrap");
+    if(boardCard){
+      setTimeout(() => boardCard.scrollIntoView({ behavior:"smooth", block:"nearest" }), 80);
     }
   }
 
