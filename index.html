@@ -162,7 +162,7 @@
   /* ── Status bar ── */
   .status{
     display:grid; grid-template-columns:repeat(5,1fr);
-    gap:8px; padding:12px 14px 0;
+    gap:8px; padding:12px 8px 0;
   }
   .stat{
     background:rgba(26,107,107,.12); border:1px solid rgba(201,149,42,.18);
@@ -181,25 +181,27 @@
   .p2{ background:radial-gradient(circle at 35% 30%,#fff5cc 0%,#ffd761 18%,#c9952a 60%,#6b3a1f 100%); }
 
   /* ── Board ── */
-  .board-section{ padding:10px 14px 18px; }
-  .board-shell{ overflow-x:auto; width:100%; -webkit-overflow-scrolling:touch; }
+  .board-section{ padding:10px 8px 18px; }
+  .board-shell{ overflow:visible; width:100%; }
   .column-buttons,.board{
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    gap:5px; min-width:280px;
+    gap:5px;
+    width:100%;
   }
   .drop-btn{
     height:42px; border-radius:10px; font-weight:800; font-size:.9rem;
     background:linear-gradient(180deg,rgba(26,107,107,.5),rgba(13,74,74,.7));
     border:1px solid rgba(77,184,184,.3); color:var(--teal-light);
-    padding:0; border-radius:10px; min-height:42px;
+    padding:0; min-height:42px; width:100%;
+    overflow:hidden; white-space:nowrap;
   }
   .board-wrap{
     margin-top:6px; border-radius:18px; padding:10px 10px 14px;
     border:1px solid rgba(201,149,42,.2);
     box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),var(--shadow);
     transition:background .4s ease;
-    overflow:hidden;
+    overflow:visible;
   }
   .cell{
     width:100%; aspect-ratio:1/1; border-radius:50%;
@@ -349,21 +351,31 @@
     .stat .value{ font-size:.85rem; }
   }
   @media(max-width:540px){
-    .wrap{ padding:10px 8px 32px; }
+    .wrap{ padding:10px 4px 32px; }
     .status{ grid-template-columns:repeat(3,1fr); }
     .row2,.mc-choices-grid{ grid-template-columns:1fr; }
-    .column-buttons,.board{ gap:4px; }
-    .drop-btn{ font-size:.8rem; height:38px; min-height:38px; }
-    .board-wrap{ padding:8px 8px 12px; border-radius:14px; }
+    .column-buttons,.board{ gap:3px; }
+    .drop-btn{ font-size:.75rem; height:36px; min-height:36px; }
+    .board-section{ padding:8px 4px 14px; }
+    .board-wrap{ padding:6px 6px 10px; border-radius:12px; }
     .btn-row button{ min-width:0; font-size:.85rem; padding:11px 12px; }
     .qe-tabs{ gap:5px; }
     .qe-tab{ padding:7px 11px; font-size:.82rem; }
     .modal{ padding:16px; }
     .choice-btn{ padding:12px 13px; font-size:.9rem; }
+    .card-body{ padding:10px 8px; }
+    .card .status{ padding:10px 8px 0; }
   }
-  @media(max-width:380px){
-    h1{ font-size:1.3rem; }
-    .column-buttons,.board{ gap:3px; }
+  @media(max-width:400px){
+    .wrap{ padding:8px 2px 28px; }
+    .column-buttons,.board{ gap:2px; }
+    .drop-btn{ font-size:.7rem; height:34px; min-height:34px; }
+    .board-wrap{ padding:5px 5px 8px; }
+    .board-section{ padding:6px 2px 12px; }
+  }
+  @media(max-width:340px){
+    .column-buttons,.board{ gap:1px; }
+    .board-wrap{ padding:4px; }
   }
 </style>
 </head>
@@ -492,7 +504,7 @@
     <!-- ══ GAME BOARD PANEL ══ -->
     <section class="card">
       <!-- Status bar -->
-      <div class="status">
+      <div class="status" id="boardStatus">
         <div class="stat">
           <div class="label">Turn</div>
           <div class="value" id="turnText">—</div>
@@ -1977,14 +1989,6 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
   applyThemeUI();
   updateCounts();
   previewQuestions();
-</script>
-<script>
-/* Notify Wix loader that the HTML game is ready */
-window.addEventListener("load", function () {
-  if (window.parent) {
-    window.parent.postMessage({ type: "WGLT_READY" }, "*");
-  }
-});
 </script>
 </body>
 </html>
