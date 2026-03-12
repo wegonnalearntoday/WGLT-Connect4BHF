@@ -95,9 +95,10 @@
   select,input{
     width:100%; padding:11px 13px; border-radius:10px;
     border:1px solid rgba(201,149,42,.25);
-    background:rgba(10,12,14,.7); color:var(--text); outline:none;
+    background:#000; color:var(--text); outline:none;
     font-size:.93rem; -webkit-appearance:none; appearance:none;
   }
+  select option, select optgroup{ background:#000; color:var(--text); }
   select:focus,input:focus{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(201,149,42,.15); }
   textarea{
     font:inherit; width:100%; padding:11px 13px; border-radius:10px;
@@ -126,6 +127,25 @@
     background:linear-gradient(135deg,var(--teal),var(--teal2));
     color:var(--cream); border-color:var(--teal-light);
     font-weight:700;
+  }
+  .btn-primary.win-glow, #startBtn.win-glow{
+    box-shadow:0 0 0 2px rgba(232,184,75,.5), 0 0 22px rgba(232,184,75,.45), 0 0 42px rgba(77,184,184,.24);
+    animation:startPulse 1s ease-in-out infinite;
+  }
+  @keyframes startPulse{
+    0%,100%{ transform:scale(1); filter:brightness(1); }
+    50%{ transform:scale(1.08); filter:brightness(1.2); }
+  }
+  @keyframes startHalo{
+    0%,100%{ box-shadow:0 0 0 0 rgba(232,184,75,.0), 0 0 24px rgba(232,184,75,.55), 0 0 48px rgba(77,184,184,.28); }
+    50%{ box-shadow:0 0 0 8px rgba(232,184,75,.18), 0 0 40px rgba(232,184,75,.88), 0 0 72px rgba(77,184,184,.45); }
+  }
+  #startBtn.win-glow{
+    position:relative;
+    outline:4px solid rgba(232,184,75,.98);
+    outline-offset:3px;
+    animation:startPulse 1s ease-in-out infinite, startHalo 1.2s ease-in-out infinite;
+    z-index:2;
   }
   .btn-warn{
     background:linear-gradient(135deg,var(--red),#8b2020);
@@ -264,6 +284,36 @@
   .feedback{ min-height:22px; margin-top:10px; font-weight:800; font-size:.95rem; }
   .good{ color:#81f3a0; }
   .bad{ color:#ff8f8f; }
+
+  /* ── Scroll targets + confetti ── */
+  #columnButtons{ scroll-margin-top:18px; }
+  #questionText{
+    scroll-margin-top:18px;
+    background:rgba(201,149,42,.08);
+    border:1px solid rgba(201,149,42,.14);
+    border-radius:14px;
+    padding:12px 13px;
+  }
+  .confetti-layer{
+    position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:10001;
+  }
+  .confetti-canvas{
+    position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:10003;
+  }
+  .confetti-piece{
+    position:fixed; top:-12px; width:10px; height:16px; opacity:.95;
+    border-radius:2px; animation:confettiFall linear forwards;
+    will-change:transform, opacity;
+  }
+  @keyframes confettiFall{
+    0%{ transform:translate3d(0,-10vh,0) rotate(0deg); opacity:1; }
+    100%{ transform:translate3d(var(--drift),110vh,0) rotate(720deg); opacity:0; }
+  }
+  @keyframes confettiBurst{
+    0%{ transform:scale(.4) translateY(14px); opacity:0; }
+    20%{ transform:scale(1.15) translateY(0); opacity:1; }
+    100%{ transform:scale(1.45) translateY(-30px); opacity:0; }
+  }
 
   /* ── Editor Modal ── */
   .qeditor-modal{ width:min(820px,100%); }
@@ -545,6 +595,8 @@
     </section>
   </div>
 </div>
+
+<div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
 <!-- ══ QUESTION MODAL ══ -->
 <div class="modal-backdrop" id="modalBackdrop">
@@ -1122,9 +1174,11 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
   const playerTwoName   = document.getElementById("playerTwoName");
   const customModeToggle= document.getElementById("customModeToggle");
   const editorBackdrop  = document.getElementById("editorBackdrop");
+  const startBtn        = document.getElementById("startBtn");
+  const confettiLayer   = document.getElementById("confettiLayer");
 
   // ─── Event Listeners ──────────────────────────────────────────────────────
-  document.getElementById("startBtn").addEventListener("click", startGame);
+  startBtn.addEventListener("click", startGame);
   document.getElementById("resetBtn").addEventListener("click", resetBoardOnly);
   document.getElementById("sampleBtn").addEventListener("click", previewQuestions);
   document.getElementById("closeModalBtn").addEventListener("click", closeQuestionModal);
@@ -1276,6 +1330,139 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
     setTimeout(() => { el.textContent = ""; el.className = "feedback"; }, 2800);
   }
 
+  function clearWinCelebration(){
+    startBtn.classList.remove("win-glow");
+    startBtn.style.removeProperty("box-shadow");
+    startBtn.style.removeProperty("outline");
+    startBtn.style.removeProperty("animation");
+    if(confettiLayer) confettiLayer.innerHTML = "";
+    document.querySelectorAll(".wglt-burst").forEach(el => el.remove());
+    const oldCanvas = document.getElementById("confettiCanvas");
+    if(oldCanvas) oldCanvas.remove();
+  }
+
+  function pulseStartButton(){
+    startBtn.classList.remove("win-glow");
+    void startBtn.offsetWidth;
+    startBtn.classList.add("win-glow");
+    startBtn.style.boxShadow = "0 0 0 4px rgba(232,184,75,.65), 0 0 32px rgba(232,184,75,.78), 0 0 64px rgba(77,184,184,.42)";
+    startBtn.style.outline = "4px solid rgba(232,184,75,.98)";
+    startBtn.style.animation = "startPulse 1s ease-in-out infinite, startHalo 1.2s ease-in-out infinite";
+  }
+
+  function launchConfetti(){
+    const layer = confettiLayer || document.body;
+    if(confettiLayer) confettiLayer.innerHTML = "";
+
+    const palette = ["#e8b84b", "#c9952a", "#4db8b8", "#d62828", "#e8d5b0", "#2e8b57", "#111111", "#ffffff"];
+    const total = 260;
+
+    for(let i = 0; i < total; i++){
+      const piece = document.createElement("span");
+      piece.className = "confetti-piece";
+      const left = Math.random() * 100;
+      const drift = (Math.random() * 360 - 180).toFixed(0) + "px";
+      const duration = (Math.random() * 1.8 + 2.4).toFixed(2) + "s";
+      const delay = (Math.random() * 0.45).toFixed(2) + "s";
+      const rotate = Math.floor(Math.random() * 360);
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      piece.style.left = left + "vw";
+      piece.style.background = color;
+      piece.style.animationDuration = duration;
+      piece.style.animationDelay = delay;
+      piece.style.setProperty("--drift", drift);
+      piece.style.transform = `translate3d(0,-10vh,0) rotate(${rotate}deg)`;
+      layer.appendChild(piece);
+      setTimeout(() => piece.remove(), 5200);
+    }
+
+    for(let i = 0; i < 8; i++){
+      const burst = document.createElement("div");
+      burst.className = "wglt-burst";
+      burst.textContent = i % 2 === 0 ? "🎉" : "✨";
+      burst.style.position = "fixed";
+      burst.style.left = (6 + i * 12) + "vw";
+      burst.style.top = (12 + (i % 3) * 10) + "vh";
+      burst.style.fontSize = (34 + Math.random() * 24) + "px";
+      burst.style.zIndex = "10002";
+      burst.style.pointerEvents = "none";
+      burst.style.animation = "confettiBurst 1400ms ease-out forwards";
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 1600);
+    }
+
+    const oldCanvas = document.getElementById("confettiCanvas");
+    if(oldCanvas) oldCanvas.remove();
+    const canvas = document.createElement("canvas");
+    canvas.id = "confettiCanvas";
+    canvas.className = "confetti-canvas";
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => {
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+
+    const particles = Array.from({length: 180}, () => ({
+      x: Math.random() * window.innerWidth,
+      y: -20 - Math.random() * window.innerHeight * 0.3,
+      w: 6 + Math.random() * 8,
+      h: 8 + Math.random() * 10,
+      vx: -3 + Math.random() * 6,
+      vy: 2 + Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      vr: -0.2 + Math.random() * 0.4,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      life: 120 + Math.random() * 40
+    }));
+
+    let frame = 0;
+    function draw(){
+      frame++;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.03;
+        p.rot += p.vr;
+        p.life -= 1;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 120));
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      if(frame < 170){
+        requestAnimationFrame(draw);
+      } else {
+        canvas.remove();
+      }
+    }
+    requestAnimationFrame(draw);
+    setTimeout(() => { if(canvas.isConnected) canvas.remove(); }, 4200);
+    window.addEventListener("resize", resize, { once: true });
+  }
+
+  function scrollToQuestionBox(){
+    if(!modalBackdrop.classList.contains("show")) return;
+    const modal = modalBackdrop.querySelector(".modal");
+    if(modal) modal.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      questionText.scrollIntoView({ behavior:"smooth", block:"center" });
+    }, 80);
+  }
+
+  function scrollToNumbers(){
+    if(columnButtonsEl){
+      setTimeout(() => columnButtonsEl.scrollIntoView({ behavior:"smooth", block:"center" }), 80);
+    }
+  }
+
   // ─── Theme UI ─────────────────────────────────────────────────────────────
   function applyThemeUI(){
     const cfg = themeConfig[themeSelect.value];
@@ -1328,6 +1515,7 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
 
   // ─── Game Control ─────────────────────────────────────────────────────────
   function startGame(){
+    clearWinCelebration();
     CONNECT_GOAL = parseInt(goalSelect.value, 10);
     initBoardState();
     currentPlayer = 1;
@@ -1345,6 +1533,7 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
   }
 
   function resetBoardOnly(){
+    clearWinCelebration();
     clearTimer();
     closeQuestionModal();
     initBoardState();
@@ -1407,7 +1596,8 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
     choicesWrap.style.display = currentQuestion.type === "mc"    ? "grid" : "none";
 
     if(currentQuestion.type === "mc"){
-      currentQuestion.choices.forEach(choice => {
+      const renderedChoices = shuffleArray([...(currentQuestion.choices || [])]);
+      renderedChoices.forEach(choice => {
         const btn = document.createElement("button");
         btn.className = "choice-btn";
         btn.textContent = choice;
@@ -1419,11 +1609,7 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
     }
 
     modalBackdrop.classList.add("show");
-    // Scroll the board card into view so the modal appears over it
-    const boardCard = document.getElementById("boardWrap");
-    if(boardCard){
-      boardCard.scrollIntoView({ behavior:"smooth", block:"center" });
-    }
+    scrollToQuestionBox();
     startQuestionTimer();
   }
 
@@ -1467,10 +1653,7 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
   }
 
   function scrollToBoard(){
-    const boardCard = document.getElementById("boardWrap");
-    if(boardCard){
-      setTimeout(() => boardCard.scrollIntoView({ behavior:"smooth", block:"nearest" }), 80);
-    }
+    scrollToNumbers();
   }
 
   function closeQuestionModal(){
@@ -1498,6 +1681,9 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
           winLine.classList.add("show");
           turnText.textContent = name;
           turnName.textContent = name + " wins!";
+          launchConfetti();
+          pulseStartButton();
+          scrollToNumbers();
           return;
         }
         if(isBoardFull()){
@@ -1567,7 +1753,13 @@ Question | Answer | Wrong1 | Wrong2 | Wrong3</div>
     }
 
     if(pool.length === 0) return null;
-    return randomItem(pool);
+    const picked = randomItem(pool);
+    if(!picked) return null;
+    const clone = JSON.parse(JSON.stringify(picked));
+    if(clone.type === "mc" && Array.isArray(clone.choices)){
+      clone.choices = shuffleArray([...clone.choices]);
+    }
+    return clone;
   }
 
   function previewQuestions(){
